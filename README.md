@@ -1,7 +1,7 @@
 # My2048
 A clone of the puzzle game 2048 created with Unity and Photoshop for Android
 
-![alt tag](https://i.imgur.com/er6xFbZ.png) ![alt tag](https://i.imgur.com/u15oyO1.png)
+![alt tag](https://i.imgur.com/5JclVww.png)
 
 My version is essentially faithful to the original game except for the undo button. You can only undo your last move once. If you ask me I think having undo makes the game too easy :)
 
