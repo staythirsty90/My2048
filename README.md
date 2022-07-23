@@ -15,6 +15,6 @@ Sprites are batched together to reduce draw calls. All gameobjects are instantia
 
 Since this project is a bit old, I could optimize the logic for handling the movement + combination of matching tiles. Now knowing how the game works fundamentally I could rewrite it with less code and complexity
 
-## Lessons Learned:
+## Lessons Learned
 
-Originally published on Google Play in 2018. Wrapping my head around the idea of sliding tiles around and having numbers combine only if they are equal was quite challenging at first. I learned a lot about breaking steps down into simple sequential transactions, which was necessary and extremely useful when implementing the undo feature.
+Originally published on Google Play in 2018. Wrapping my head around the idea of sliding tiles around and having numbers combine only if they are equal was quite challenging at first. I learned a lot about breaking steps down into simple sequential transactions, which was necessary and extremely useful when implementing the undo feature
