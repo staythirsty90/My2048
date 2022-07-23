@@ -1,7 +1,7 @@
 # My2048
 A clone of the puzzle game 2048 created with Unity and Photoshop for Android
 
-Try it on ![Google Play](https://play.google.com/store/apps/details?id=com.SunsetWorkshop.My2048)
+Download it on ![Google Play](https://play.google.com/store/apps/details?id=com.SunsetWorkshop.My2048)
 
 ![alt tag](https://i.imgur.com/5JclVwwm.png)
 
