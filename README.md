@@ -1,5 +1,5 @@
 # My2048
-A clone of the puzzle game 2048 created with Unity and Photoshop
+A clone of the puzzle game 2048 created with Unity and Photoshop for Android
 
 ![alt tag](https://i.imgur.com/er6xFbZ.png) ![alt tag](https://i.imgur.com/u15oyO1.png)
 
