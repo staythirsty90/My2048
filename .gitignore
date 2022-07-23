@@ -361,3 +361,18 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Library
+/exportedProject
+/Temp
+/user.keystore
+/my2048_sw.aab
+/my2048_screenShot02.png
+/my2048_screenShot01.png
+/my2048_new.aab
+/my2048_icon_512.png
+/my2048_icon_512.jpg
+/my2048_feature.png
+/my2048.apk
+/my2048.aab
+/7inch_screenshot.png
+/.vsconfig
