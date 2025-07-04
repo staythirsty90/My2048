@@ -75,17 +75,17 @@ namespace My2048
 
         public void Save(TwentyFortyEight game)
         {
-            var gameData                = new GameData();
-            gameData.activeTileData     = new TileData[game.board.length];
-            gameData.removedTileData    = new TileData[game.board.length];
+            var gameData = new GameData {
+                activeTileData  = new TileData[game.board.length],
+                removedTileData = new TileData[game.board.length]
+            };
 
             for (int x = 0; x < game.board.size; x++)
             {
                 for (int y = 0; y < game.board.size; y++)
                 {
-                    var index = new Index(x, y);
-                    Tile t = game.board[index];
-                    Tile r = game.board.removedTiles[index];
+                    Tile t = game.board[x, y];
+                    Tile r = game.board.removedTiles[x, y];
                     TileData d;
                     if (t)
                     {
@@ -93,7 +93,7 @@ namespace My2048
                     }
                     else
                     {
-                        d = new TileData(0, new Index(-1, -1), new Index(-1, -1), new Index(-1, -1), false, false);
+                        d = new TileData(0, Index.Invalid, Index.Invalid, Index.Invalid, false, false);
                     }
 
                     gameData.activeTileData[x + y * game.board.size] = d;
@@ -104,7 +104,7 @@ namespace My2048
                     }
                     else
                     {
-                        d = new TileData(0, new Index(-1, -1), new Index(-1, -1), new Index(-1, -1), false, false);
+                        d = new TileData(0, Index.Invalid, Index.Invalid, Index.Invalid, false, false);
                     }
 
                     gameData.removedTileData[x + y * game.board.size] = d;

@@ -321,11 +321,10 @@ public class TwentyFortyEight : MonoBehaviour {
             int x = move.startX + i * move.xRowShift;
             int y = move.startY + i * move.yRowShift;
             for(int j = 0; j < board.size; j++) {
-                var index = new Index(x, y);
-                Tile t = board[index];
+                Tile t = board[x, y];
                 if(t) {
                     t.Undo();
-                    board[index]                 = null;
+                    board[x, y]                 = null;
                     t.index                     = t.currentMove.index;
                     board[t.currentMove.index]  = t;
                     t.nextPosition              = board.GetWorldPos(t.currentMove.index);
@@ -335,7 +334,7 @@ public class TwentyFortyEight : MonoBehaviour {
                         continue;
                     }
                     Tile r = board.removedTiles[t.otherTileIndex];
-                    board[r.currentMove.index.x] = r;
+                    board[r.currentMove.index] = r;
                     r.nextPosition = board.GetWorldPos(r.currentMove.index);
                     board.removedTiles[r.currentMove.index] = null;
                     r.Undo();
@@ -414,21 +413,20 @@ public class TwentyFortyEight : MonoBehaviour {
         if(!CanAMoveBeMade()) {
             return;
         }
-        gameData.previousSwipe = currentSwipe;
-        gameData.previousScore = gameData.score;
-        moving = true;
-        gameData.canUndo = true;
+        gameData.previousSwipe  = currentSwipe;
+        gameData.previousScore  = gameData.score;
+        moving                  = true;
+        gameData.canUndo        = true;
         board.ClearRemovedTiles();
         for(int i = 0; i < board.size; i++) {
             int x = move.startX + i * move.xRowShift;
             int y = move.startY + i * move.yRowShift;
             for(int j = 0; j < board.size; j++) {
-                var index = new Index(x, y);
-                Tile t = board[index];
+                Tile t = board[x, y];
                 if(t) {
                     stack.Push(t);
                     t.Clean();
-                    board[index] = null;
+                    board[x, y] = null;
                 }
                 x += move.xDir;
                 y += move.yDir;
@@ -440,26 +438,26 @@ public class TwentyFortyEight : MonoBehaviour {
             Tile prevTile = null;
             for(int j = 0; j < tileCount; j++) {
                 Tile tile = stack.Pop();
-                if(prevTile) {
-                    if(prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
-                        prevTile    += tile;
-                        deltaScore  += prevTile.value;
-                        tile.currentMove.index = tile.index;
-                        board[tile.currentMove.index] = null;
-                        board.removedTiles[tile.currentMove.index] = tile;
-                        Tile.DebugSetGameObjectName(prevTile);
-                        tile.nextPosition = prevTile.nextPosition;
-                        continue;
-                    }
+                
+                if(prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
+                    prevTile    += tile;
+                    deltaScore  += prevTile.value;
+                    tile.currentMove.index = tile.index;
+                    board[tile.currentMove.index] = null;
+                    board.removedTiles[tile.currentMove.index] = tile;
+                    Tile.DebugSetGameObjectName(prevTile);
+                    tile.nextPosition = prevTile.nextPosition;
+                    continue;
                 }
-                tile.currentMove.index = tile.index;
-                tile.index = new Index(x, y);
-                board[tile.index] = tile;
-                tile.nextPosition = board.GetWorldPos(x, y);
+                
+                tile.currentMove.index  = tile.index;
+                tile.index              = new Index(x, y);
+                board[tile.index]       = tile;
+                tile.nextPosition       = board.GetWorldPos(x, y);
+                prevTile                = tile;
+                x                       -= move.xDir;
+                y                       -= move.yDir;
                 Tile.DebugSetGameObjectName(tile);
-                prevTile = tile;
-                x -= move.xDir;
-                y -= move.yDir;
             }
         }
         InitializeLerp();
@@ -469,7 +467,7 @@ public class TwentyFortyEight : MonoBehaviour {
     bool CanAMoveBeMade() {
         int count = board.tiles.Count;
         for(int i = 0; i < count; i++) {
-            Tile t = board[i];
+            Tile t = board.tiles[i];
             if(CanMoveOrMergeTile(t)) {
                 return true;
             }
@@ -526,19 +524,20 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void NewGamePressed() {
-        gameData.score = 0;
-        gameData.previousScore = 0;
-        gameData.canUndo = false;
-        moving = false;
-        undoing = false;
+        gameData.score          = 0;
+        gameData.previousScore  = 0;
+        gameData.canUndo        = false;
+        moving                  = false;
+        undoing                 = false;
+
         for(int i = 0; i < board.length; i++) {
-            Tile t = board[i];
+            Tile t = board.tiles[i];
             if(!t) {
                 continue;
             }
             t.Reset();
             t.gameObject.SetActive(false);
-            board[i] = null;
+            board.tiles[i] = null;
 
             t = board.removedTiles.list[i];
             if(!t) {

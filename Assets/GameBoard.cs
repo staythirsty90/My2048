@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 [System.Serializable]
@@ -34,8 +35,21 @@ public class RemovedTiles {
     int size;
 
     public Tile this[Index index] {
-        get { return list[index.x + index.y * size]; }
-        set { list[index.x + index.y * size] = value; }
+        get => GetTileFromIndex(index.x, index.y);
+        set => SetTileFromIndex(index.x, index.y, value);
+    }
+
+    public Tile this[int x, int y] {
+        get => GetTileFromIndex(x, y);
+        set => SetTileFromIndex(x, y, value);
+    }
+
+    Tile GetTileFromIndex(in int x, in int y) {
+        return list[x + y * size];
+    }
+
+    void SetTileFromIndex(in int x, in int y, Tile tile) {
+        list[x + y * size] = tile;
     }
 
     public RemovedTiles(int size) {
@@ -52,7 +66,6 @@ public class RemovedTiles {
 public class GameBoard {
     public Tile tilePrefab;
     public int seed = 101;
-    public Index[] indices;
     public Vector2[] positions;
     public List<Tile> tiles;
     public RemovedTiles removedTiles;
@@ -67,27 +80,38 @@ public class GameBoard {
     GameObject gameObject;
     public Tile spawnedTile;
 
-    public Tile this[int i] {
-        get { return tiles[i]; }
-        set { tiles[i] = value; }
+    public Tile this[int x, int y] {
+        get {
+            return GetTileFromIndex(x, y);
+        }
+        set {
+            SetTileFromIndex(x, y, value);
+        }
     }
 
     public Tile this[Index Index] {
         get {
-            int index = Index.x + Index.y * size;
-            if (index < 0 || index >= length) {
-                return null;
-            }
-            return tiles[index];
+            return GetTileFromIndex(Index.x, Index.y);
         }
         set {
-            int index = Index.x + Index.y * size;
-
-            if (index < 0 || index >= length) {
-                return;
-            }
-            tiles[Index.x + Index.y * size] = value;
+            SetTileFromIndex(Index.x, Index.y, value);
         }
+    }
+
+    Tile GetTileFromIndex(in int x, in int y) {
+        int index = x + y * size;
+        if (index < 0 || index >= length) {
+            return null;
+        }
+        return tiles[index];
+    }
+
+    void SetTileFromIndex(in int x, in int y, Tile tile) {
+        int index = x + y * size;
+        if (index < 0 || index >= length) {
+            return;
+        }
+        tiles[index] = tile;
     }
 
     public static void InitializePool(GameBoard g) {
@@ -106,7 +130,6 @@ public class GameBoard {
 
     public static void Create(GameBoard g, GameObject go, bool isNewGame) {
         g.length        = g.size * g.size;
-        g.indices       = new Index[g.length];
         g.positions     = new Vector2[g.length];
         g.tiles         = new List<Tile>(g.length);
         g.removedTiles  = new RemovedTiles(g.size);
@@ -119,7 +142,6 @@ public class GameBoard {
         for (int x = 0; x < g.size; x++) {
             for (int y = 0; y < g.size; y++) {
                 int i = x + y * g.size;
-                g.indices[i] = new Index(x, y);
                 g.positions[i] = new Vector2(x, y);
                 g.tiles.Add(null);
                 g.removedTiles.Add(null);
@@ -192,7 +214,6 @@ public class GameBoard {
     {
         gb.size         = gd.size;
         gb.length       = gd.activeTileData.Length;
-        gb.indices      = new Index[gb.length];
         gb.positions    = new Vector2[gb.length];
         gb.tiles        = new List<Tile>(gb.length);
         gb.removedTiles = new RemovedTiles(gb.size);
@@ -214,7 +235,6 @@ public class GameBoard {
             for (int y = 0; y < gb.size; y++)
             {
                 int i           = x + y * gb.size;
-                gb.indices[i]   = new Index(x, y);
                 gb.positions[i] = new Vector2(x, y);
 
                 TileData td = gd.removedTileData[i];
@@ -256,7 +276,7 @@ public class GameBoard {
                     t.SetSprite();
                     t.transform.position = gb.positions[i];
                     t.nextPosition       = gb.GetWorldPos(t.index.x, t.index.y);
-                    gb[new Index(x, y)]  = t;
+                    gb[x, y]             = t;
                 }
             }
         }
@@ -372,7 +392,7 @@ public class GameBoard {
                 break;
         }
         for (int i = 0; i < count; i++) {
-            Tile query = this[new Index(x + xDir, y + yDir)];
+            Tile query = this[x + xDir, y + yDir];
             if (!query) continue;
             next = query;
         }
@@ -382,9 +402,11 @@ public class GameBoard {
     public Index GetNextEmptyIndex(Tile t, SwipeData swipeData) {
         var x       = t.index.x;
         var y       = t.index.y;
+        var next    = Index.Invalid;
         var count   = 0;
         var xDir    = 0;
         var yDir    = 0;
+        
         switch (swipeData.direction) {
             case Direction.TOP_TO_BOTTOM:
                 xDir    = 0;
@@ -397,17 +419,17 @@ public class GameBoard {
                 count   = swipeData.invert ? size - x - 1 : x;
                 break;
         }
+
         for (int i = 0; i < count; i++) {
-            var index = new Index(x + xDir, y + yDir);
-            if (index.x >= size || index.y >= size) {
-                return Index.Invalid;
+            if (x + xDir >= size || y + yDir >= size) {
+                return next;
             }
-            Tile query = this[index];
+            Tile query = this[x + xDir, y + yDir];
             if(!query) {
-                return index;
+                next = new Index(x + xDir, y + yDir);
             }
         }
-        return Index.Invalid;
+        return next;
     }
 
     Tile GetTileFromPool() {
