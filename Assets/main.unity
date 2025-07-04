@@ -1319,6 +1319,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 802009818}
+    - target: {fileID: 114293171440919924, guid: a3ab6e92938cee848b0aec9a95c54eb9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: TwentyFortyEight, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 114293171440919924, guid: a3ab6e92938cee848b0aec9a95c54eb9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: NewGamePressed
+      objectReference: {fileID: 0}
     - target: {fileID: 114382489786819418, guid: a3ab6e92938cee848b0aec9a95c54eb9,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1328,6 +1338,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114382489786819418, guid: a3ab6e92938cee848b0aec9a95c54eb9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: TwentyFortyEight, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 114382489786819418, guid: a3ab6e92938cee848b0aec9a95c54eb9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: UndoPressed
       objectReference: {fileID: 0}
     - target: {fileID: 223715648558751278, guid: a3ab6e92938cee848b0aec9a95c54eb9,
         type: 3}

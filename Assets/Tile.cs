@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 [System.Serializable]
 public struct Index {
@@ -13,72 +10,74 @@ public struct Index {
         this.y = y;
     }
 
+    public static Index Invalid => new Index(-1, -1);
+    
+
     public override string ToString() {
         return x.ToString() + " : " + y.ToString();
     }
 }
+
 [System.Serializable]
 public struct LerpData<T> {
-    public float lerpDuration;// = 0.25f;
-    public float timeStarted;// = Time.time;
-    public T start;// = tf.position;
-    public T end;// = pos;
+    public float lerpDuration;
+    public float timeStarted;
+    public T start;
+    public T end;
     public float t;
 }
 
 [System.Serializable]
-public struct moveMemory {
-    public bool merged;// = false;
-    public bool removed;// = false;
-    public bool spawnedFromMove;// = false;
+public struct MoveMemory {
+    public bool merged;
+    public bool removed;
+    public bool spawnedFromMove;
     public Index index;
 }
 
-
+[RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
 public class Tile : MonoBehaviour {
-    public List<moveMemory> memory = new List<moveMemory>(100);
-    public moveMemory currentMove;
+    public MoveMemory currentMove;
     public Index index;
     public Index otherTileIndex;
     public uint value;
     public Vector2 nextPosition;
-    Transform tf;
     public Animator animator;
+    public LerpData<Vector2> lerpData;
+    
+    Transform tf;
     SpriteRenderer sr;
     static TwentyFortyEight game;
-    public LerpData<Vector2> lerpData;
 
-    private void Awake() {
+    void Awake() {
         tf = transform;
         sr = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         if(!game) game = FindObjectOfType<TwentyFortyEight>();
-        spawn();
+        Spawn();
     }
 
     public static Tile operator +(Tile a, Tile b) {
-        a.merge();
+        a.Merge();
         a.otherTileIndex = b.index;
         b.otherTileIndex = a.index;
-        b.remove();
+        b.Remove();
         DebugSetGameObjectName(a);
         return a;
     }
 
-    public void lerp() {
+    public void Lerp() {
         float timeSinceStarted = Time.time - lerpData.timeStarted;
         lerpData.t = timeSinceStarted / lerpData.lerpDuration;
         tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
     }
 
-    public void moveToPos(Vector2 pos) {
+    public void MoveToPos(Vector2 pos) {
         tf.position = pos;
     }
 
-    public void setSprite() {
-        //index = new Index(x, y);
-        sr.sprite = game.valueToTile(value);
-        //sr.sprite = s;
+    public void SetSprite() {
+        sr.sprite = game.ValueToTile(value);
         DebugSetGameObjectName(this);
     }
 
@@ -87,60 +86,60 @@ public class Tile : MonoBehaviour {
         //t.name = "Tile " + "(" + t.index.x + "," + t.index.y + ")" + " Value: " + t.value;
     }
 
-    public void clean() {
+    public void Clean() {
         currentMove.merged = false;
         currentMove.removed = false;
         currentMove.spawnedFromMove = false;
         otherTileIndex = new Index(-1,-1);
     }
 
-    public void shrink() {
+    public void Shrink() {
         animator.SetTrigger("shrink");
     }
 
-    public void spawn() {
+    public void Spawn() {
         animator.SetTrigger("spawn");
     }
 
-    public void merge() {
+    public void Merge() {
         value += value;
         currentMove.merged = true;
     }
 
-    public void unmerge() {
-        value = value / 2;
+    public void Unmerge() {
+        value /= 2;
         DebugSetGameObjectName(this);
     }
 
-    public void remove() {
+    public void Remove() {
         currentMove.removed = true;
     }
 
-    public void reset() {
-        clean();
+    public void Reset() {
+        Clean();
         value = 0;
         nextPosition = new Vector2(-1, -1);
         gameObject.SetActive(false);
         animator.enabled = false;
     }
 
-    public void onRemovedFromPool() {
-        clean();
+    public void OnRemovedFromPool() {
+        Clean();
         animator.enabled = true;
         gameObject.SetActive(true);
-        spawn();
+        Spawn();
     }
 
-    public void undo() {
+    public void Undo() {
         if (currentMove.merged) {
-            unmerge();
+            Unmerge();
         }
         if (currentMove.removed) {
             gameObject.SetActive(true);
         }
     }
 
-    void onShrinkFinished() {
-        game.onSpawnedTileShrunk();
+    void OnShrinkFinished() { // NOTE: Called from the shrink Animation event.
+        game.OnSpawnedTileShrunk();
     }
 }
