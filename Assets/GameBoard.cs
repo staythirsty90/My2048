@@ -81,21 +81,13 @@ public class GameBoard {
     public Tile spawnedTile;
 
     public Tile this[int x, int y] {
-        get {
-            return GetTileFromIndex(x, y);
-        }
-        set {
-            SetTileFromIndex(x, y, value);
-        }
+        get => GetTileFromIndex(x, y);
+        set => SetTileFromIndex(x, y, value);
     }
 
     public Tile this[Index Index] {
-        get {
-            return GetTileFromIndex(Index.x, Index.y);
-        }
-        set {
-            SetTileFromIndex(Index.x, Index.y, value);
-        }
+        get => GetTileFromIndex(Index.x, Index.y);
+        set => SetTileFromIndex(Index.x, Index.y, value);
     }
 
     Tile GetTileFromIndex(in int x, in int y) {
@@ -224,23 +216,19 @@ public class GameBoard {
             InitializePool(gb);
         }
 
-        for (int i = 0; i < gb.length; i++)
-        {
+        for (int i = 0; i < gb.length; i++) {
             gb.tiles.Add(null);
             gb.removedTiles.Add(null);
         }
 
-        for (int x = 0; x < gb.size; x++)
-        {
-            for (int y = 0; y < gb.size; y++)
-            {
+        for (int x = 0; x < gb.size; x++) {
+            for (int y = 0; y < gb.size; y++) {
                 int i           = x + y * gb.size;
                 gb.positions[i] = new Vector2(x, y);
 
                 TileData td = gd.removedTileData[i];
                 Tile r      = LoadTile(gb, td);
-                if (r)
-                {
+                if (r) {
                     r.gameObject.SetActive(false);
                     r.SetSprite();
                     r.currentMove.removed                   = true;
@@ -250,24 +238,18 @@ public class GameBoard {
             }
         }
 
-        for (int x = 0; x < gb.size; x++)
-        {
-            for (int y = 0; y < gb.size; y++)
-            {
-                int i = x + y * gb.size;
+        for (int x = 0; x < gb.size; x++) {
+            for (int y = 0; y < gb.size; y++) {
+                int i       = x + y * gb.size;
                 TileData td = gd.activeTileData[i];
-                Tile t = LoadTile(gb, td);
-                if (t)
-                {
-                    if (t.currentMove.spawnedFromMove)
-                    {
+                Tile t      = LoadTile(gb, td);
+                if (t) {
+                    if (t.currentMove.spawnedFromMove) {
                         gb.spawnedTile = t;
                     }
-                    if (t.currentMove.merged)
-                    {
+                    if (t.currentMove.merged) {
                         Tile r = gb.removedTiles[t.otherTileIndex];
-                        if (r)
-                        {
+                        if (r) {
                             t.otherTileIndex        = r.index;
                             r.otherTileIndex        = t.index;
                             r.transform.position    = gb.GetWorldPos(r.otherTileIndex);
@@ -281,8 +263,7 @@ public class GameBoard {
             }
         }
 
-        gb.upData = new MoveData
-        {
+        gb.upData = new MoveData {
             xDir = 0,
             yDir = 1,
             startX = 0,
@@ -293,8 +274,7 @@ public class GameBoard {
             yRowShift = 0
         };
 
-        gb.downData = new MoveData
-        {
+        gb.downData = new MoveData {
             xDir = 0,
             yDir = -1,
             startX = 0,
@@ -305,8 +285,7 @@ public class GameBoard {
             yRowShift = 0
         };
 
-        gb.leftData = new MoveData
-        {
+        gb.leftData = new MoveData {
             xDir = 1,
             yDir = 0,
             startX = 0,
@@ -317,8 +296,7 @@ public class GameBoard {
             yRowShift = 1
         };
 
-        gb.rightData = new MoveData
-        {
+        gb.rightData = new MoveData {
             xDir = -1,
             yDir = 0,
             startX = gb.size - 1,
