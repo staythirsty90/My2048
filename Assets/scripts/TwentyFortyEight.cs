@@ -25,7 +25,7 @@ public class TwentyFortyEight : MonoBehaviour {
     public GameBoard board;
     MoveData move;
     Stack<Tile> stack;
-    Process state = Process.GETTING_INPUT;
+    Process state = Process.HANDLING_INPUT;
     SwipeData currentSwipe;
     SaveLoad saveLoad;
 
@@ -53,7 +53,7 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void Update() {
         switch(state) {
-            case Process.GETTING_INPUT:
+            case Process.HANDLING_INPUT:
                 HandleInput();
                 break;
             case Process.LERPING_TILES:
@@ -334,7 +334,7 @@ public class TwentyFortyEight : MonoBehaviour {
         undoButton.interactable = gameData.canUndo;
         saveLoad.Save(this);
         
-        state = Process.GETTING_INPUT;
+        state = Process.HANDLING_INPUT;
     }
 
     void CheckGameStatus() {
