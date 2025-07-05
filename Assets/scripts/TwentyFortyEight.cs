@@ -5,77 +5,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public enum Direction {
-    TOP_TO_BOTTOM, LEFT_TO_RIGHT
-}
-
-public enum Process {
-    GETTING_INPUT,
-    LERPING_TILES,
-    UNDOING
-}
-
-[System.Serializable]
-public struct SwipeData {
-    public Direction direction;
-    public bool invert;
-}
-
-[System.Serializable]
-public struct TileData {
-    public uint value;
-    public Index index;
-    public Index oldIndex;
-    public Index otherTileIndex;
-    public bool merged;
-    public bool spawned;
-
-    public TileData(uint Value, Index index, Index oldIndex, Index otherIndex, bool Merged, bool Spawned) {
-        value = Value;
-        this.index = index;
-        this.oldIndex = oldIndex;
-        otherTileIndex = otherIndex;
-        merged = Merged;
-        spawned = Spawned;
-    }
-
-    public static void FillTileData(ref TileData[] tileDatas, in List<Tile> tiles) {
-        tileDatas = new TileData[tiles.Capacity];
-        for(int i = 0; i < tileDatas.Length; i++) {
-            tileDatas[i] = MakeTileData(tiles[i]);
-        }
-    }
-
-    public static void FillTileDataRemoved(ref TileData[] removedTileDatas, in List<Tile> removedTiles) {
-        removedTileDatas = new TileData[removedTiles.Capacity];
-        for(int i = 0; i < removedTileDatas.Length; i++) {
-            removedTileDatas[i] = MakeTileDataRemoved(removedTiles[i]);
-        }
-    }
-
-    public static TileData MakeTileData(in Tile t) {
-        if(t) {
-            return new TileData(t.value, t.index, t.currentMove.index, t.otherTileIndex, t.currentMove.merged, t.currentMove.spawnedFromMove);
-        }
-        return Empty;
-    }
-
-    public static TileData MakeTileDataRemoved(in Tile rt) {
-        // TODO: Do we need to make sure that the Tile is actually 'removed'?
-        if(rt) {
-            return new TileData(rt.value, rt.index, rt.currentMove.index, rt.otherTileIndex, false, false);
-        }
-        return Empty;
-    }
-
-    public static TileData Empty => new TileData(0, Index.Invalid, Index.Invalid, Index.Invalid, false, false);
-}
-
 [RequireComponent(typeof(SaveLoad))]
 public class TwentyFortyEight : MonoBehaviour {
     public int TouchDeadZone = 60;
     public float TouchMaxHeightPercent = 90;
     public int winningNumber = 2048;
+    public float tileLerpDuration = 0.25f;
     public Sprite[] spriteTiles;
     public Text scoreText;
     public Text bestText;
@@ -146,53 +81,38 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void InitializeLerp() {
         foreach(var t in board.tiles) {
-            if(!t) {
-                continue;
-            }
-            t.lerpData = new LerpData<Vector2>() {
-                timeStarted     = Time.time,
-                start           = t.transform.position,
-                end             = t.nextPosition,
-                lerpDuration    = 0.25f,
-                t               = 0f,
-            };
+            SetLerp(t);
         }
 
         foreach(var t in board.removedTiles.list) {
-            if(!t) {
-                continue;
-            }
-            t.lerpData = new LerpData<Vector2>() {
-                timeStarted     = Time.time,
-                start           = t.transform.position,
-                end             = t.nextPosition,
-                lerpDuration    = 0.25f,
-                t               = 0f,
-            };
+            SetLerp(t);
         }
     }
 
+    void SetLerp(Tile t) {
+        if(t == null) return;
+        t.lerpData = new LerpData<Vector2>() {
+            timeStarted     = Time.time,
+            start           = t.transform.position,
+            end             = t.nextPosition,
+            lerpDuration    = tileLerpDuration,
+            t               = 0f,
+        };
+    }
+
     void LerpTiles() {
-        var lerping = false;
+        var isLerping = false;
+        
         foreach(var t in board.tiles) {
-            if(!t) {
-                continue;
-            }
-            if(t.lerpData.t < 1) {
-                t.Lerp();
-                lerping = true;
-            }
+            CheckLerp(ref isLerping, t);
         }
-        foreach(var t in board.removedTiles.list) {
-            if(!t) {
-                continue;
-            }
-            if(t.lerpData.t < 1) {
-                t.Lerp();
-                lerping = true;
-            }
+        
+        foreach(var rt in board.removedTiles.list) {
+            CheckLerp(ref isLerping, rt);
         }
-        if(!lerping) {
+
+        if(!isLerping) {
+            // All tiles have completing their Lerping.
             foreach(var t in board.tiles) {
                 if(!t) {
                     continue;
@@ -203,7 +123,8 @@ public class TwentyFortyEight : MonoBehaviour {
                 }
                 t.SetSprite();
             }
-            foreach(var t in board.removedTiles.list) { // i need this because i remove the tiles and put them into another list...
+
+            foreach(var t in board.removedTiles.list) {
                 if(!t) {
                     continue;
                 }
@@ -211,8 +132,15 @@ public class TwentyFortyEight : MonoBehaviour {
                 t.gameObject.SetActive(false);
                 t.SetSprite();
             }
+
             OnTilesFinishedMoving();
-            state = Process.GETTING_INPUT;
+        }
+    }
+
+    void CheckLerp(ref bool lerping, Tile t) {
+        if(t && t.lerpData.t < 1) {
+            t.Lerp();
+            lerping = true;
         }
     }
 
@@ -407,6 +335,8 @@ public class TwentyFortyEight : MonoBehaviour {
         }
         undoButton.interactable = gameData.canUndo;
         saveLoad.Save(this);
+        
+        state = Process.GETTING_INPUT;
     }
 
     void CheckGameStatus() {

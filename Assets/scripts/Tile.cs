@@ -1,39 +1,5 @@
 ﻿using UnityEngine;
 
-[System.Serializable]
-public struct Index {
-    public int x;
-    public int y;
-
-    public Index(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public static Index Invalid => new Index(-1, -1);
-
-    public override string ToString() {
-        return x.ToString() + " : " + y.ToString();
-    }
-}
-
-[System.Serializable]
-public struct LerpData<T> {
-    public float lerpDuration;
-    public float timeStarted;
-    public T start;
-    public T end;
-    public float t;
-}
-
-[System.Serializable]
-public struct MoveMemory {
-    public bool merged;
-    public bool removed;
-    public bool spawnedFromMove;
-    public Index index;
-}
-
 [RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
 public class Tile : MonoBehaviour {
     public MoveMemory currentMove;

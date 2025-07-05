@@ -1,18 +1,6 @@
 ﻿using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using System.Collections.Generic;
-
-[System.Serializable]
-public struct GameData {
-    public bool canUndo;
-    public SwipeData previousSwipe;
-    public TileData[] activeTileData;
-    public TileData[] removedTileData;
-    public uint score;
-    public uint previousScore;
-    public int size;
-}
 
 namespace My2048 {
     public class SaveLoad : MonoBehaviour {
