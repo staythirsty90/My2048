@@ -47,6 +47,7 @@ MonoBehaviour:
   TouchDeadZone: 50
   TouchMaxHeightPercent: 0.7
   winningNumber: 2048
+  tileLerpDuration: 0.25
   spriteTiles:
   - {fileID: 21300004, guid: 253fd774f0c0d3a4b8bb6057386dbbcd, type: 3}
   - {fileID: 21300000, guid: 253fd774f0c0d3a4b8bb6057386dbbcd, type: 3}
@@ -91,42 +92,6 @@ MonoBehaviour:
       list: []
     size: 4
     length: 0
-    upData:
-      xDir: 0
-      yDir: 0
-      startX: 0
-      startY: 0
-      endX: 0
-      endY: 0
-      xRowShift: 0
-      yRowShift: 0
-    downData:
-      xDir: 0
-      yDir: 0
-      startX: 0
-      startY: 0
-      endX: 0
-      endY: 0
-      xRowShift: 0
-      yRowShift: 0
-    rightData:
-      xDir: 0
-      yDir: 0
-      startX: 0
-      startY: 0
-      endX: 0
-      endY: 0
-      xRowShift: 0
-      yRowShift: 0
-    leftData:
-      xDir: 0
-      yDir: 0
-      startX: 0
-      startY: 0
-      endX: 0
-      endY: 0
-      xRowShift: 0
-      yRowShift: 0
     spawnedTile: {fileID: 0}
 --- !u!114 &6541096947385674224
 MonoBehaviour:
