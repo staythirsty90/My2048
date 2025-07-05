@@ -7,7 +7,7 @@ public enum Direction {
 }
 
 public enum Process {
-    HANDLING_INPUT,
+    GETTING_INPUT,
     LERPING_TILES,
     UNDOING
 }

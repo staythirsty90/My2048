@@ -25,7 +25,7 @@ public class TwentyFortyEight : MonoBehaviour {
     public GameBoard board;
     MoveData move;
     Stack<Tile> stack;
-    Process state = Process.HANDLING_INPUT;
+    Process state = Process.GETTING_INPUT;
     SwipeData currentSwipe;
     SaveLoad saveLoad;
 
@@ -53,7 +53,7 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void Update() {
         switch(state) {
-            case Process.HANDLING_INPUT:
+            case Process.GETTING_INPUT:
                 HandleInput();
                 break;
             case Process.LERPING_TILES:
@@ -131,7 +131,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 t.SetSprite();
             }
 
-            OnTilesFinishedMoving();
+            OnTilesFinishedLerp();
         }
     }
 
@@ -309,32 +309,31 @@ public class TwentyFortyEight : MonoBehaviour {
         state = Process.LERPING_TILES;
     }
 
-    public void OnTilesFinishedMoving() {
+    public void OnTilesFinishedLerp() {
         if(undoing) {
-            undoing = false;
-            gameData.score = gameData.previousScore;
+            undoing             = false;
+            gameData.score      = gameData.previousScore;
+            scoreText.text      = gameData.previousScore.ToString();
         }
-        else if(!undoing) {
-            board.spawnedTile = board.SpawnRandomTile(true);
-            gameData.score += deltaScore;
-            deltaScore = 0;
+        else {
+            board.spawnedTile   = board.SpawnRandomTile(true);
+            gameData.score      += deltaScore;
+            deltaScore          = 0;
+
             if(gameData.score > bestScore) {
                 bestScore = gameData.score;
             }
+
+            scoreText.text      = gameData.score.ToString();
+            bestText.text       = bestScore.ToString();
             CheckGameStatus();
         }
-        moving = false;
-        if(!undoing) {
-            scoreText.text = gameData.score.ToString();
-            bestText.text = bestScore.ToString();
-        }
-        else {
-            scoreText.text = gameData.previousScore.ToString();
-        }
+
+        moving                  = false;
         undoButton.interactable = gameData.canUndo;
         saveLoad.Save(this);
         
-        state = Process.HANDLING_INPUT;
+        state                   = Process.GETTING_INPUT;
     }
 
     void CheckGameStatus() {

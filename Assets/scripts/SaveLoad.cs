@@ -50,7 +50,7 @@ namespace My2048 {
             return false;
         }
 
-        public void Save(TwentyFortyEight game) {
+        public void Save(in TwentyFortyEight game) {
 
             var gameData = new GameData() {
                 canUndo         = game.gameData.canUndo,
