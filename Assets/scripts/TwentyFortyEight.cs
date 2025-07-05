@@ -458,30 +458,30 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void OnSwipeUp() {
-        currentSwipe.direction = Direction.TOP_TO_BOTTOM;
-        currentSwipe.invert = true;
-        move = MoveData.UpData;
+        currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
+        currentSwipe.invert     = true;
+        move                    = MoveData.UpData;
         MoveTiles();
     }
 
     public void OnSwipeDown() {
-        currentSwipe.direction = Direction.TOP_TO_BOTTOM;
-        currentSwipe.invert = false;
-        move = MoveData.DownData;
+        currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
+        currentSwipe.invert     = false;
+        move                    = MoveData.DownData;
         MoveTiles();
     }
 
     public void OnSwipeLeft() {
-        currentSwipe.direction = Direction.LEFT_TO_RIGHT;
-        currentSwipe.invert = false;
-        move = MoveData.RightData;
+        currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
+        currentSwipe.invert     = false;
+        move                    = MoveData.RightData;
         MoveTiles();
     }
 
     public void OnSwipeRight() {
-        currentSwipe.direction = Direction.LEFT_TO_RIGHT;
-        currentSwipe.invert = true;
-        move = MoveData.LeftData;
+        currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
+        currentSwipe.invert     = true;
+        move                    = MoveData.LeftData;
         MoveTiles();
     }
 
