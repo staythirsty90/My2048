@@ -11,7 +11,6 @@ public struct Index {
     }
 
     public static Index Invalid => new Index(-1, -1);
-    
 
     public override string ToString() {
         return x.ToString() + " : " + y.ToString();
@@ -90,7 +89,7 @@ public class Tile : MonoBehaviour {
         currentMove.merged = false;
         currentMove.removed = false;
         currentMove.spawnedFromMove = false;
-        otherTileIndex = new Index(-1,-1);
+        otherTileIndex = Index.Invalid;
     }
 
     public void Shrink() {

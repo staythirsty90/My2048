@@ -23,6 +23,57 @@ public struct MoveData {
         yRowShift = yrowshift;
     }
 
+    public static void Init(in int size) {
+        UpData = new MoveData {
+            xDir = 0,
+            yDir = 1,
+            startX = 0,
+            startY = 0,
+            endX = 0,
+            endY = size - 1,
+            xRowShift = 1,
+            yRowShift = 0
+        };
+
+        DownData = new MoveData {
+            xDir = 0,
+            yDir = -1,
+            startX = 0,
+            startY = size - 1,
+            endX = 0,
+            endY = 0,
+            xRowShift = 1,
+            yRowShift = 0
+        };
+
+        LeftData = new MoveData {
+            xDir = 1,
+            yDir = 0,
+            startX = 0,
+            startY = 0,
+            endX = size - 1,
+            endY = 0,
+            xRowShift = 0,
+            yRowShift = 1
+        };
+
+        RightData = new MoveData {
+            xDir = -1,
+            yDir = 0,
+            startX = size - 1,
+            startY = 0,
+            endX = 0,
+            endY = 0,
+            xRowShift = 0,
+            yRowShift = 1
+        };
+    }
+
+    public static MoveData UpData;
+    public static MoveData DownData;
+    public static MoveData LeftData;
+    public static MoveData RightData;
+
     public override string ToString() {
         return string.Format("xDir: {0}, yDir: {1}, startX: {2}, startY: {3}, endX: {4}, endY: {5}, xRowShift:{6}, yRowShift:{7}",
             xDir, yDir, startX, startY, endX, endY, xRowShift, yRowShift);
@@ -67,10 +118,6 @@ public class GameBoard {
     public RemovedTiles removedTiles;
     public int size;
     public int length;
-    public MoveData upData;
-    public MoveData downData;
-    public MoveData rightData;
-    public MoveData leftData;
     List<Tile> tilePool;
     SpriteRenderer sr;
     GameObject gameObject;
@@ -137,49 +184,6 @@ public class GameBoard {
             }
         }
 
-        g.upData = new MoveData {
-            xDir = 0,
-            yDir = 1,
-            startX = 0,
-            startY = 0,
-            endX = 0,
-            endY = g.size - 1,
-            xRowShift = 1,
-            yRowShift = 0
-        };
-
-        g.downData = new MoveData {
-            xDir = 0,
-            yDir = -1,
-            startX = 0,
-            startY = g.size - 1,
-            endX = 0,
-            endY = 0,
-            xRowShift = 1,
-            yRowShift = 0
-        };
-
-        g.leftData = new MoveData {
-            xDir = 1,
-            yDir = 0,
-            startX = 0,
-            startY = 0,
-            endX = g.size - 1,
-            endY = 0,
-            xRowShift = 0,
-            yRowShift = 1
-        };
-
-        g.rightData = new MoveData {
-            xDir = -1,
-            yDir = 0,
-            startX = g.size - 1,
-            startY = 0,
-            endX = 0,
-            endY = 0,
-            xRowShift = 0,
-            yRowShift = 1
-        };
     }
 
     static Tile LoadTile(GameBoard gb, TileData td) {
@@ -256,50 +260,6 @@ public class GameBoard {
                 }
             }
         }
-
-        gb.upData = new MoveData {
-            xDir = 0,
-            yDir = 1,
-            startX = 0,
-            startY = 0,
-            endX = 0,
-            endY = gb.size - 1,
-            xRowShift = 1,
-            yRowShift = 0
-        };
-
-        gb.downData = new MoveData {
-            xDir = 0,
-            yDir = -1,
-            startX = 0,
-            startY = gb.size - 1,
-            endX = 0,
-            endY = 0,
-            xRowShift = 1,
-            yRowShift = 0
-        };
-
-        gb.leftData = new MoveData {
-            xDir = 1,
-            yDir = 0,
-            startX = 0,
-            startY = 0,
-            endX = gb.size - 1,
-            endY = 0,
-            xRowShift = 0,
-            yRowShift = 1
-        };
-
-        gb.rightData = new MoveData {
-            xDir = -1,
-            yDir = 0,
-            startX = gb.size - 1,
-            startY = 0,
-            endX = 0,
-            endY = 0,
-            xRowShift = 0,
-            yRowShift = 1
-        };
     }
 
     public Tile SpawnTile(int index, uint value, bool spawnedFromMove) {

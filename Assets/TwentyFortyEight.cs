@@ -106,6 +106,8 @@ public class TwentyFortyEight : MonoBehaviour {
         scoreText.text          = gameData.score.ToString();
         undoButton.interactable = gameData.canUndo;
 
+        MoveData.Init(board.size);
+
         if(gameData.activeTileData == null) {
             // There was no save file.
             GameBoard.Create(board, null, false);
@@ -342,10 +344,10 @@ public class TwentyFortyEight : MonoBehaviour {
         var move = new MoveData();
         switch(gameData.previousSwipe.direction) {
             case Direction.TOP_TO_BOTTOM:
-                move = gameData.previousSwipe.invert ? board.upData : board.downData;
+                move = gameData.previousSwipe.invert ? MoveData.UpData : MoveData.DownData;
                 break;
             case Direction.LEFT_TO_RIGHT:
-                move = gameData.previousSwipe.invert ? board.leftData : board.rightData;
+                move = gameData.previousSwipe.invert ? MoveData.LeftData : MoveData.RightData;
                 break;
         }
         for(int i = 0; i < board.size; i++) {
@@ -529,28 +531,28 @@ public class TwentyFortyEight : MonoBehaviour {
     public void OnSwipeUp() {
         currentSwipe.direction = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert = true;
-        move = board.upData;
+        move = MoveData.UpData;
         MoveTiles();
     }
 
     public void OnSwipeDown() {
         currentSwipe.direction = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert = false;
-        move = board.downData;
+        move = MoveData.DownData;
         MoveTiles();
     }
 
     public void OnSwipeLeft() {
         currentSwipe.direction = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert = false;
-        move = board.rightData;
+        move = MoveData.RightData;
         MoveTiles();
     }
 
     public void OnSwipeRight() {
         currentSwipe.direction = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert = true;
-        move = board.leftData;
+        move = MoveData.LeftData;
         MoveTiles();
     }
 
