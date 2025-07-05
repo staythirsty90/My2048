@@ -151,7 +151,7 @@ public class GameBoard {
                     r.gameObject.SetActive(false);
                     r.SetSprite();
                     r.currentMove.removed       = true;
-                    r.nextPosition              = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
+                    r.lerpData.end              = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
                     gb.removedTiles[r.index]    = r;
                 }
             }
@@ -176,7 +176,7 @@ public class GameBoard {
                     }
                     t.SetSprite();
                     t.transform.position = gb.positions[i];
-                    t.nextPosition       = gb.GetWorldPos(t.index.x, t.index.y);
+                    t.lerpData.end       = gb.GetWorldPos(t.index.x, t.index.y);
                     gb[x, y]             = t;
                 }
             }

@@ -6,7 +6,6 @@ public class Tile : MonoBehaviour {
     public Index index;
     public Index otherTileIndex;
     public uint value;
-    public Vector2 nextPosition;
     public Animator animator;
     public LerpData<Vector2> lerpData;
     
@@ -83,7 +82,6 @@ public class Tile : MonoBehaviour {
     public void Reset() {
         Clean();
         value = 0;
-        nextPosition = new Vector2(-1, -1);
         gameObject.SetActive(false);
         animator.enabled = false;
     }

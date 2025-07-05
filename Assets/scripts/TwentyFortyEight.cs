@@ -81,23 +81,21 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void InitializeLerp() {
         foreach(var t in board.tiles) {
-            SetLerp(t);
+            InitLerpForTile(t);
         }
 
         foreach(var t in board.removedTiles.list) {
-            SetLerp(t);
+            InitLerpForTile(t);
         }
     }
 
-    void SetLerp(Tile t) {
+    void InitLerpForTile(Tile t) {
         if(t == null) return;
-        t.lerpData = new LerpData<Vector2>() {
-            timeStarted     = Time.time,
-            start           = t.transform.position,
-            end             = t.nextPosition,
-            lerpDuration    = tileLerpDuration,
-            t               = 0f,
-        };
+        
+        t.lerpData.timeStarted     = Time.time;
+        t.lerpData.start           = t.transform.position;
+        t.lerpData.lerpDuration    = tileLerpDuration;
+        t.lerpData.t               = 0f;
     }
 
     void LerpTiles() {
@@ -117,7 +115,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 if(!t) {
                     continue;
                 }
-                t.transform.position = t.nextPosition;
+                t.transform.position = t.lerpData.end;
                 if(t.currentMove.merged) {
                     t.animator.SetTrigger("merge");
                 }
@@ -128,7 +126,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 if(!t) {
                     continue;
                 }
-                t.transform.position = t.nextPosition;
+                t.transform.position = t.lerpData.end;
                 t.gameObject.SetActive(false);
                 t.SetSprite();
             }
@@ -288,7 +286,7 @@ public class TwentyFortyEight : MonoBehaviour {
                     board[x, y]                 = null;
                     t.index                     = t.currentMove.index;
                     board[t.currentMove.index]  = t;
-                    t.nextPosition              = board.GetWorldPos(t.currentMove.index);
+                    t.lerpData.end              = board.GetWorldPos(t.currentMove.index);
                     if(!t.currentMove.merged) {
                         x += move.xDir;
                         y += move.yDir;
@@ -296,7 +294,7 @@ public class TwentyFortyEight : MonoBehaviour {
                     }
                     Tile r = board.removedTiles[t.otherTileIndex];
                     board[r.currentMove.index] = r;
-                    r.nextPosition = board.GetWorldPos(r.currentMove.index);
+                    r.lerpData.end = board.GetWorldPos(r.currentMove.index);
                     board.removedTiles[r.currentMove.index] = null;
                     r.Undo();
                     t.Clean();
@@ -403,20 +401,21 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile tile = stack.Pop();
                 
                 if(prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
-                    prevTile    += tile;
-                    deltaScore  += prevTile.value;
-                    tile.currentMove.index = tile.index;
-                    board[tile.currentMove.index] = null;
-                    board.removedTiles[tile.currentMove.index] = tile;
+                    prevTile                                    += tile;
+                    deltaScore                                  += prevTile.value;
+                    tile.currentMove.index                      = tile.index;
+                    board[tile.currentMove.index]               = null;
+                    board.removedTiles[tile.currentMove.index]  = tile;
+                    tile.lerpData.end                           = prevTile.lerpData.end;
+
                     Tile.DebugSetGameObjectName(prevTile);
-                    tile.nextPosition = prevTile.nextPosition;
                     continue;
                 }
                 
                 tile.currentMove.index  = tile.index;
                 tile.index              = new Index(x, y);
                 board[tile.index]       = tile;
-                tile.nextPosition       = board.GetWorldPos(x, y);
+                tile.lerpData.end       = board.GetWorldPos(x, y);
                 prevTile                = tile;
                 x                       -= move.xDir;
                 y                       -= move.yDir;
