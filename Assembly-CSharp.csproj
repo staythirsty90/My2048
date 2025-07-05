@@ -55,10 +55,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\SaveLoad.cs" />
-     <Compile Include="Assets\Tile.cs" />
-     <Compile Include="Assets\GameBoard.cs" />
-     <Compile Include="Assets\TwentyFortyEight.cs" />
+     <Compile Include="Assets\scripts\SaveLoad.cs" />
+     <Compile Include="Assets\scripts\Tile.cs" />
+     <Compile Include="Assets\scripts\GameBoard.cs" />
+     <Compile Include="Assets\scripts\TwentyFortyEight.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
  </Reference>
