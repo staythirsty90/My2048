@@ -1,5 +1,6 @@
 ﻿using My2048;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -438,7 +439,7 @@ public class TwentyFortyEight : MonoBehaviour {
         return false;
     }
 
-    bool CanMoveOrMergeTile(Tile tile) {
+    bool CanMoveOrMergeTile(in Tile tile) {
         if(!tile) {
             return false;
         }
@@ -448,14 +449,12 @@ public class TwentyFortyEight : MonoBehaviour {
         }
 
         Tile query = board.GetNextTile(tile, currentSwipe);
-        if(query) {
-            if(tile.value == query.value) return true;
-        }
-        Index i = board.GetNextEmptyIndex(tile, currentSwipe);
-        if(i.x != -1 && i.y != -1) {
+        if(query && tile.value == query.value) {
             return true;
         }
-        return false;
+        
+        Index i = board.GetNextEmptyIndex(tile, currentSwipe);
+        return i.x != -1 && i.y != -1;
     }
 
     public void OnSwipeUp() {
