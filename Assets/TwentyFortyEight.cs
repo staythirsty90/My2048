@@ -38,6 +38,37 @@ public struct TileData {
         merged = Merged;
         spawned = Spawned;
     }
+
+    public static void FillTileData(ref TileData[] tileDatas, in List<Tile> tiles) {
+        tileDatas = new TileData[tiles.Capacity];
+        for(int i = 0; i < tileDatas.Length; i++) {
+            tileDatas[i] = MakeTileData(tiles[i]);
+        }
+    }
+
+    public static void FillTileDataRemoved(ref TileData[] removedTileDatas, in List<Tile> removedTiles) {
+        removedTileDatas = new TileData[removedTiles.Capacity];
+        for(int i = 0; i < removedTileDatas.Length; i++) {
+            removedTileDatas[i] = MakeTileDataRemoved(removedTiles[i]);
+        }
+    }
+
+    public static TileData MakeTileData(in Tile t) {
+        if(t) {
+            return new TileData(t.value, t.index, t.currentMove.index, t.otherTileIndex, t.currentMove.merged, t.currentMove.spawnedFromMove);
+        }
+        return Empty;
+    }
+
+    public static TileData MakeTileDataRemoved(in Tile rt) {
+        // TODO: Do we need to make sure that the Tile is actually 'removed'?
+        if(rt) {
+            return new TileData(rt.value, rt.index, rt.currentMove.index, rt.otherTileIndex, false, false);
+        }
+        return Empty;
+    }
+
+    public static TileData Empty => new TileData(0, Index.Invalid, Index.Invalid, Index.Invalid, false, false);
 }
 
 [RequireComponent(typeof(SaveLoad))]

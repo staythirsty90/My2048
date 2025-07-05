@@ -56,10 +56,6 @@ public class RemovedTiles {
         this.size = size;
         list = new List<Tile>(this.size * this.size);
     }
-
-    public void Add(Tile t) {
-        list.Add(t);
-    }
 }
 
 [System.Serializable]
@@ -136,7 +132,7 @@ public class GameBoard {
                 int i = x + y * g.size;
                 g.positions[i] = new Vector2(x, y);
                 g.tiles.Add(null);
-                g.removedTiles.Add(null);
+                g.removedTiles.list.Add(null);
                 
             }
         }
@@ -186,8 +182,7 @@ public class GameBoard {
         };
     }
 
-    static Tile LoadTile(GameBoard gb, TileData td)
-    {
+    static Tile LoadTile(GameBoard gb, TileData td) {
         if (td.value == 0) {
             return null;
         }
@@ -202,8 +197,7 @@ public class GameBoard {
         return t;
     }
 
-    public static void Load(GameBoard gb, GameObject go, GameData gd, bool isNewGame)
-    {
+    public static void Load(GameBoard gb, GameObject go, GameData gd, bool isNewGame) {
         gb.size         = gd.size;
         gb.length       = gd.activeTileData.Length;
         gb.positions    = new Vector2[gb.length];
@@ -218,7 +212,7 @@ public class GameBoard {
 
         for (int i = 0; i < gb.length; i++) {
             gb.tiles.Add(null);
-            gb.removedTiles.Add(null);
+            gb.removedTiles.list.Add(null);
         }
 
         for (int x = 0; x < gb.size; x++) {
@@ -231,9 +225,9 @@ public class GameBoard {
                 if (r) {
                     r.gameObject.SetActive(false);
                     r.SetSprite();
-                    r.currentMove.removed                   = true;
-                    r.nextPosition                          = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
-                    gb.removedTiles[r.index]   = r;
+                    r.currentMove.removed       = true;
+                    r.nextPosition              = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
+                    gb.removedTiles[r.index]    = r;
                 }
             }
         }
