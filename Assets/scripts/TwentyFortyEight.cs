@@ -1,6 +1,5 @@
 ﻿using My2048;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -498,7 +497,6 @@ public class TwentyFortyEight : MonoBehaviour {
                 continue;
             }
             t.Reset();
-            t.gameObject.SetActive(false);
             board.tiles[i] = null;
 
             t = board.removedTiles.list[i];
@@ -506,7 +504,6 @@ public class TwentyFortyEight : MonoBehaviour {
                 continue;
             }
             t.Reset();
-            t.gameObject.SetActive(false);
             board.removedTiles.list[i] = null;
         }
         saveLoad.InitGame(board, true);
