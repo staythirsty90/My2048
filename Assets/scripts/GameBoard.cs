@@ -7,21 +7,8 @@ public class RemovedTiles {
     int size;
 
     public Tile this[Index index] {
-        get => GetTileFromIndex(index.x, index.y);
-        set => SetTileFromIndex(index.x, index.y, value);
-    }
-
-    public Tile this[int x, int y] {
-        get => GetTileFromIndex(x, y);
-        set => SetTileFromIndex(x, y, value);
-    }
-
-    Tile GetTileFromIndex(in int x, in int y) {
-        return list[x + y * size];
-    }
-
-    void SetTileFromIndex(in int x, in int y, Tile tile) {
-        list[x + y * size] = tile;
+        get => list[index.x + index.y * size];
+        set => list[index.x + index.y * size] = value;
     }
 
     public RemovedTiles(int size) {
@@ -39,10 +26,9 @@ public class GameBoard {
     public RemovedTiles removedTiles;
     public int size;
     public int length;
-    List<Tile> tilePool;
-    SpriteRenderer sr;
-    GameObject gameObject;
     public Tile spawnedTile;
+    
+    List<Tile> tilePool;
 
     public Tile this[int x, int y] {
         get => GetTileFromIndex(x, y);
@@ -89,7 +75,6 @@ public class GameBoard {
         g.positions     = new Vector2[g.length];
         g.tiles         = new List<Tile>(g.length);
         g.removedTiles  = new RemovedTiles(g.size);
-        g.gameObject    = go;
 
         if(!isNewGame) {
             InitializePool(g);
@@ -128,8 +113,6 @@ public class GameBoard {
         gb.positions    = new Vector2[gb.length];
         gb.tiles        = new List<Tile>(gb.length);
         gb.removedTiles = new RemovedTiles(gb.size);
-        gb.gameObject   = go;
-        gb.sr           = gb.gameObject.GetComponent<SpriteRenderer>();
         
         if(!isNewGame) {
             InitializePool(gb);
