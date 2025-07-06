@@ -45,7 +45,7 @@ public class Tile : MonoBehaviour {
         DebugSetGameObjectName(this);
     }
 
-    public static void DebugSetGameObjectName(Tile t) {
+    public static void DebugSetGameObjectName(in Tile t) {
         if (!t) return;
         //t.name = "Tile " + "(" + t.index.x + "," + t.index.y + ")" + " Value: " + t.value;
     }
@@ -70,11 +70,6 @@ public class Tile : MonoBehaviour {
         currentMove.merged = true;
     }
 
-    public void Unmerge() {
-        value /= 2;
-        DebugSetGameObjectName(this);
-    }
-
     public void Remove() {
         currentMove.removed = true;
     }
@@ -95,7 +90,9 @@ public class Tile : MonoBehaviour {
 
     public void Undo() {
         if (currentMove.merged) {
-            Unmerge();
+            // Unmerge
+            value /= 2;
+            DebugSetGameObjectName(this);
         }
         if (currentMove.removed) {
             gameObject.SetActive(true);

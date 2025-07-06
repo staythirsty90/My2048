@@ -61,7 +61,7 @@ namespace My2048 {
             };
 
             TileData.FillTileData(ref gameData.activeTileData, game.board.tiles);
-            TileData.FillTileDataRemoved(ref gameData.removedTileData, game.board.removedTiles.list);
+            TileData.FillTileDataRemoved(ref gameData.removedTileData, game.board.removedTiles);
             
             var file = File.Create(savePath);
             bf.Serialize(file, gameData);

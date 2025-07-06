@@ -2,28 +2,12 @@
 using UnityEngine;
 
 [System.Serializable]
-public class RemovedTiles {
-    public List<Tile> list;
-    int size;
-
-    public Tile this[Index index] {
-        get => list[index.x + index.y * size];
-        set => list[index.x + index.y * size] = value;
-    }
-
-    public RemovedTiles(int size) {
-        this.size = size;
-        list = new List<Tile>(this.size * this.size);
-    }
-}
-
-[System.Serializable]
 public class GameBoard {
     public Tile tilePrefab;
     public int seed = 101;
     public Vector2[] positions;
     public List<Tile> tiles;
-    public RemovedTiles removedTiles;
+    public List<Tile> removedTiles;
     public int size;
     public int length;
     public Tile spawnedTile;
@@ -74,7 +58,7 @@ public class GameBoard {
         g.length        = g.size * g.size;
         g.positions     = new Vector2[g.length];
         g.tiles         = new List<Tile>(g.length);
-        g.removedTiles  = new RemovedTiles(g.size);
+        g.removedTiles  = new List<Tile>(g.length);;
 
         if(!isNewGame) {
             InitializePool(g);
@@ -85,7 +69,7 @@ public class GameBoard {
                 int i = x + y * g.size;
                 g.positions[i] = new Vector2(x, y);
                 g.tiles.Add(null);
-                g.removedTiles.list.Add(null);
+                g.removedTiles.Add(null);
                 
             }
         }
@@ -112,7 +96,7 @@ public class GameBoard {
         gb.length       = gd.activeTileData.Length;
         gb.positions    = new Vector2[gb.length];
         gb.tiles        = new List<Tile>(gb.length);
-        gb.removedTiles = new RemovedTiles(gb.size);
+        gb.removedTiles = new List<Tile>(gb.length);
         
         if(!isNewGame) {
             InitializePool(gb);
@@ -120,7 +104,7 @@ public class GameBoard {
 
         for (int i = 0; i < gb.length; i++) {
             gb.tiles.Add(null);
-            gb.removedTiles.list.Add(null);
+            gb.removedTiles.Add(null);
         }
 
         for (int x = 0; x < gb.size; x++) {
@@ -135,7 +119,7 @@ public class GameBoard {
                     r.SetSprite();
                     r.currentMove.removed       = true;
                     r.lerpData.end              = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
-                    gb.removedTiles[r.index]    = r;
+                    gb.removedTiles[i]          = r;
                 }
             }
         }
@@ -150,11 +134,11 @@ public class GameBoard {
                         gb.spawnedTile = t;
                     }
                     if (t.currentMove.merged) {
-                        Tile r = gb.removedTiles[t.otherTileIndex];
-                        if (r) {
-                            t.otherTileIndex        = r.index;
-                            r.otherTileIndex        = t.index;
-                            r.transform.position    = gb.GetWorldPos(r.otherTileIndex);
+                        Tile r = gb.removedTiles[gb.GetOtherIFromIndex(t)];
+                        if(r) {
+                            t.otherTileIndex = r.index;
+                            r.otherTileIndex = t.index;
+                            r.transform.position = gb.GetWorldPos(r.otherTileIndex);
                         }
                     }
                     t.SetSprite();
@@ -164,6 +148,14 @@ public class GameBoard {
                 }
             }
         }
+    }
+
+    public int GetOtherIFromIndex(in Tile t) {
+        return t.otherTileIndex.x + t.otherTileIndex.y * size;
+    }
+
+    public int GetIFromIndex(in Tile t) {
+        return t.currentMove.index.x + t.currentMove.index.y * size;
     }
 
     public Tile SpawnTile(int index, uint value, bool spawnedFromMove) {
@@ -288,15 +280,15 @@ public class GameBoard {
     }
 
     public void ClearRemovedTiles() {
-        for (int i = 0; i < removedTiles.list.Count; i++) {
-            Tile r = removedTiles.list[i];
+        for (int i = 0; i < removedTiles.Count; i++) {
+            Tile r = removedTiles[i];
             if(!r) {
                 continue;
             }
             if(!tilePool.Contains(r)) {
                 tilePool.Add(r);
             }
-            removedTiles.list[i] = null;
+            removedTiles[i] = null;
         }
     }
 }
