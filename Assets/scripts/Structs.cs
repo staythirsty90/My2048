@@ -91,7 +91,7 @@ public struct MoveData {
 }
 
 [Serializable]
-public struct GameData {
+public struct SaveData {
     public bool canUndo;
     public SwipeData previousSwipe;
     public TileData[] activeTileData;

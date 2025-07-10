@@ -91,7 +91,7 @@ public class GameBoard {
         return t;
     }
 
-    public static void Load(GameBoard gb, GameObject go, GameData gd, bool isNewGame) {
+    public static void Load(GameBoard gb, GameObject go, SaveData gd, bool isNewGame) {
         gb.size         = gd.size;
         gb.length       = gd.activeTileData.Length;
         gb.positions    = new Vector2[gb.length];
