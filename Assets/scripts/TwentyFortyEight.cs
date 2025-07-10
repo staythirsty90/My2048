@@ -23,8 +23,8 @@ public class TwentyFortyEight : MonoBehaviour {
     uint deltaScore;
     Vector2 startTouch;
     Vector2 swipeDelta;
-    bool undoing;
-    bool moving;
+    bool isUndoing;
+    bool isMoving;
     MoveData move;
     Stack<Tile> stack;
     Process state = Process.GETTING_INPUT;
@@ -145,7 +145,7 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void HandleInput() {
-        if(moving || undoing) {
+        if(isMoving || isUndoing) {
             return;
         }
         #region Swipe Input
@@ -265,9 +265,9 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void Undo() {
-        if(undoing) return;
+        if(isUndoing) return;
         if(!saveData.canUndo) return;
-        undoing = true;
+        isUndoing = true;
         saveData.canUndo = false;
         var move = new MoveData();
         switch(saveData.previousSwipe.direction) {
@@ -321,8 +321,8 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void OnTilesFinishedLerp() {
-        if(undoing) {
-            undoing             = false;
+        if(isUndoing) {
+            isUndoing             = false;
             saveData.score      = saveData.previousScore;
             scoreText.text      = saveData.score.ToString();
         }
@@ -340,7 +340,7 @@ public class TwentyFortyEight : MonoBehaviour {
             CheckGameStatus();
         }
 
-        moving                  = false;
+        isMoving                  = false;
         undoButton.interactable = saveData.canUndo;
         saveLoad.Save(this);
         
@@ -378,7 +378,7 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void MoveTiles() {
-        if(moving) {
+        if(isMoving) {
             return;
         }
         if(!CanAMoveBeMade()) {
@@ -386,7 +386,7 @@ public class TwentyFortyEight : MonoBehaviour {
         }
         saveData.previousSwipe  = currentSwipe;
         saveData.previousScore  = saveData.score;
-        moving                  = true;
+        isMoving                  = true;
         saveData.canUndo        = true;
         board.ClearRemovedTiles();
         for(int i = 0; i < board.size; i++) {
@@ -497,8 +497,8 @@ public class TwentyFortyEight : MonoBehaviour {
         saveData.score          = 0;
         saveData.previousScore  = 0;
         saveData.canUndo        = false;
-        moving                  = false;
-        undoing                 = false;
+        isMoving                  = false;
+        isUndoing                 = false;
 
         for(int i = 0; i < board.length; i++) {
             Tile t = board.tiles[i];
@@ -519,7 +519,7 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void UndoPressed() {
-        if(undoing) return;
+        if(isUndoing) return;
         if(board.spawnedTile)
             board.spawnedTile.Shrink();
     }
