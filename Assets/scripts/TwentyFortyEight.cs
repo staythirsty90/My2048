@@ -300,8 +300,8 @@ public class TwentyFortyEight : MonoBehaviour {
                 r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
                 board.removedTiles[board.GetIFromIndex(r)] = null;
                 r.Undo();
-                t.Clean();
-                r.Clean();
+                t.ResetFlagsAndIndex();
+                r.ResetFlagsAndIndex();
                 r.index                                 = r.currentMove.index;
             }
         }
@@ -392,7 +392,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile t = board[x, y];
                 if(t) {
                     tileStack.Push(t);
-                    t.Clean();
+                    t.ResetFlagsAndIndex();
                     board[x, y] = null;
                 }
                 x += move.xDir;
@@ -407,7 +407,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile tile = tileStack.Pop();
                 
                 if(prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
-                    prevTile                                    += tile;
+                    prevTile.MergeWith(tile);
                     deltaScore                                  += prevTile.value;
                     tile.currentMove.index                      = tile.index;
                     board[tile.currentMove.index]               = null;
@@ -493,8 +493,8 @@ public class TwentyFortyEight : MonoBehaviour {
         saveData.score          = 0;
         saveData.previousScore  = 0;
         saveData.canUndo        = false;
-        isMoving                  = false;
-        isUndoing                 = false;
+        isMoving                = false;
+        isUndoing               = false;
 
         for(int i = 0; i < board.length; i++) {
             Tile t = board.tiles[i];

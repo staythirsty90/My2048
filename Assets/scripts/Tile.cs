@@ -21,13 +21,12 @@ public class Tile : MonoBehaviour {
         Spawn();
     }
 
-    public static Tile operator +(Tile a, Tile b) {
-        a.Merge();
-        a.otherTileIndex = b.index;
-        b.otherTileIndex = a.index;
-        b.Remove();
-        DebugSetGameObjectName(a);
-        return a;
+    public void MergeWith(Tile other) {
+        Merge();
+        otherTileIndex = other.index;
+        other.otherTileIndex = index;
+        other.Remove();
+        DebugSetGameObjectName(this);
     }
 
     public void Lerp() {
@@ -50,11 +49,11 @@ public class Tile : MonoBehaviour {
         //t.name = "Tile " + "(" + t.index.x + "," + t.index.y + ")" + " Value: " + t.value;
     }
 
-    public void Clean() {
-        currentMove.merged = false;
-        currentMove.removed = false;
+    public void ResetFlagsAndIndex() {
+        currentMove.merged          = false;
+        currentMove.removed         = false;
         currentMove.spawnedFromMove = false;
-        otherTileIndex = Index.Invalid;
+        otherTileIndex              = Index.Invalid;
     }
 
     public void Shrink() {
@@ -75,15 +74,13 @@ public class Tile : MonoBehaviour {
     }
 
     public void Reset() {
-        Clean();
+        ResetFlagsAndIndex();
         value = 0;
         gameObject.SetActive(false);
-        animator.enabled = false;
     }
 
     public void OnRemovedFromPool() {
-        Clean();
-        animator.enabled = true;
+        ResetFlagsAndIndex();
         gameObject.SetActive(true);
         Spawn();
     }
