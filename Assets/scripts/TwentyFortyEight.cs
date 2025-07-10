@@ -27,7 +27,7 @@ public class TwentyFortyEight : MonoBehaviour {
     bool isMoving;
     MoveData move;
     Stack<Tile> stack;
-    Process state = Process.GETTING_INPUT;
+    GamePhase phase = GamePhase.GETTING_INPUT;
     SwipeData currentSwipe;
     SaveLoad saveLoad;
 
@@ -54,14 +54,14 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void Update() {
-        switch(state) {
-            case Process.GETTING_INPUT:
+        switch(phase) {
+            case GamePhase.GETTING_INPUT:
                 HandleInput();
                 break;
-            case Process.LERPING_TILES:
+            case GamePhase.LERPING_TILES:
                 LerpTiles();
                 break;
-            case Process.UNDOING:
+            case GamePhase.UNDOING:
                 break;
             default:
                 break;
@@ -310,7 +310,7 @@ public class TwentyFortyEight : MonoBehaviour {
             }
         }
         InitializeLerp();
-        state = Process.LERPING_TILES;
+        phase = GamePhase.LERPING_TILES;
     }
 
     void RestoreTile(Tile t) {
@@ -344,7 +344,7 @@ public class TwentyFortyEight : MonoBehaviour {
         undoButton.interactable = saveData.canUndo;
         saveLoad.Save(this);
         
-        state                   = Process.GETTING_INPUT;
+        phase                   = GamePhase.GETTING_INPUT;
     }
 
     void CheckGameStatus() {
@@ -433,7 +433,7 @@ public class TwentyFortyEight : MonoBehaviour {
             }
         }
         InitializeLerp();
-        state = Process.LERPING_TILES;
+        phase = GamePhase.LERPING_TILES;
     }
 
     bool CanAMoveBeMade() {

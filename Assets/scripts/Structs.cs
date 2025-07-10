@@ -6,7 +6,7 @@ public enum Direction {
     LEFT_TO_RIGHT
 }
 
-public enum Process {
+public enum GamePhase {
     GETTING_INPUT,
     LERPING_TILES,
     UNDOING
