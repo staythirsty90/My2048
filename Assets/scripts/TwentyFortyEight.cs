@@ -177,19 +177,19 @@ public class TwentyFortyEight : MonoBehaviour {
 
         #if UNITY_EDITOR
         if(Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow)) {
-            OnSwipeUp();
+            SwipeUp();
         }
 
         if(Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) {
-            OnSwipeDown();
+            SwipeDown();
         }
 
         if(Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) {
-            OnSwipeRight();
+            SwipeRight();
         }
 
         if(Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) {
-            OnSwipeLeft();
+            SwipeLeft();
         }
 
         if(Input.GetKeyUp(KeyCode.R)) {
@@ -221,18 +221,18 @@ public class TwentyFortyEight : MonoBehaviour {
             if(Mathf.Abs(x) > Mathf.Abs(y)) {
                 // left or right
                 if(x < 0) {
-                    OnSwipeLeft();
+                    SwipeLeft();
                 }
                 else {
-                    OnSwipeRight();
+                    SwipeRight();
                 }
             }
             else if(y > 0) {
                 // up or down
-                OnSwipeUp();
+                SwipeUp();
             }
             else {
-                OnSwipeDown();
+                SwipeDown();
             }
             startTouch = swipeDelta = Vector2.zero;
         }
@@ -461,28 +461,28 @@ public class TwentyFortyEight : MonoBehaviour {
         return i.x != -1 && i.y != -1;
     }
 
-    public void OnSwipeUp() {
+    public void SwipeUp() {
         currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert     = true;
         move                    = MoveData.UpData;
         MoveTiles();
     }
 
-    public void OnSwipeDown() {
+    public void SwipeDown() {
         currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert     = false;
         move                    = MoveData.DownData;
         MoveTiles();
     }
 
-    public void OnSwipeLeft() {
+    public void SwipeLeft() {
         currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert     = false;
         move                    = MoveData.RightData;
         MoveTiles();
     }
 
-    public void OnSwipeRight() {
+    public void SwipeRight() {
         currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert     = true;
         move                    = MoveData.LeftData;
