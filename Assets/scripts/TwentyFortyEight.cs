@@ -61,10 +61,6 @@ public class TwentyFortyEight : MonoBehaviour {
             case GamePhase.LERPING_TILES:
                 LerpTiles();
                 break;
-            case GamePhase.UNDOING:
-                break;
-            default:
-                break;
         }
     }
 

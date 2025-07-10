@@ -9,7 +9,6 @@ public enum Direction {
 public enum GamePhase {
     GETTING_INPUT,
     LERPING_TILES,
-    UNDOING
 }
 
 [Serializable]
