@@ -26,7 +26,7 @@ public class TwentyFortyEight : MonoBehaviour {
     bool isUndoing;
     bool isMoving;
     MoveData move;
-    Stack<Tile> stack;
+    Stack<Tile> tileStack;
     GamePhase phase = GamePhase.GETTING_INPUT;
     SwipeData currentSwipe;
     SaveLoad saveLoad;
@@ -37,7 +37,7 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void Start() {
         saveData                = saveLoad.Load(board, false);
-        stack                   = new Stack<Tile>(board.size);
+        tileStack               = new Stack<Tile>(board.size);
         bestScore               = (uint)PlayerPrefs.GetInt("best");
         bestText.text           = bestScore.ToString();
         scoreText.text          = saveData.score.ToString();
@@ -391,7 +391,7 @@ public class TwentyFortyEight : MonoBehaviour {
             for(int j = 0; j < board.size; j++) {
                 Tile t = board[x, y];
                 if(t) {
-                    stack.Push(t);
+                    tileStack.Push(t);
                     t.Clean();
                     board[x, y] = null;
                 }
@@ -402,9 +402,9 @@ public class TwentyFortyEight : MonoBehaviour {
             x = move.endX + i * move.xRowShift;
             y = move.endY + i * move.yRowShift;
             Tile prevTile = null;
-            int tileCount = stack.Count;
+            int tileCount = tileStack.Count;
             for(int j = 0; j < tileCount; j++) {
-                Tile tile = stack.Pop();
+                Tile tile = tileStack.Pop();
                 
                 if(prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
                     prevTile                                    += tile;
