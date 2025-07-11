@@ -12,13 +12,13 @@ namespace My2048 {
             savePath = Application.persistentDataPath + "/save.dat";
         }
 
-        public SaveData Load(GameBoard board, bool isNewGame) {
+        public SaveData Load(GameBoard gb, bool isNewGame = false) {
             if (!TryLoad()) {
                 Debug.LogWarning("Couldn't Load a saved game, perhaps there wasn't one.");
                 return new SaveData();
             }
             else {
-                InitGame(board, isNewGame);
+                InitGame(gb, isNewGame);
             }
             return data;
         }
@@ -28,7 +28,7 @@ namespace My2048 {
                 LoadBoard(gb, isNewGame);
             }
             else {
-                GameBoard.Create(gb, gameObject, isNewGame);
+                GameBoard.Create(gb, isNewGame);
                 data.activeTileData = new TileData[gb.length];
                 data.removedTileData = new TileData[gb.length];
                 gb.SpawnRandomTile();
@@ -37,7 +37,7 @@ namespace My2048 {
         }
 
         void LoadBoard(GameBoard gb, in bool isNewGame) {
-            GameBoard.Load(gb, gameObject, data, isNewGame);
+            GameBoard.Load(gb, data, isNewGame);
         }
         
         bool TryLoad() {

@@ -36,7 +36,7 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void Start() {
-        saveData                = saveLoad.Load(board, false);
+        saveData                = saveLoad.Load(board);
         tileStack               = new Stack<Tile>(board.size);
         bestScore               = (uint)PlayerPrefs.GetInt("best");
         bestText.text           = bestScore.ToString();
@@ -47,9 +47,9 @@ public class TwentyFortyEight : MonoBehaviour {
 
         if(saveData.activeTileData == null) {
             // There was no save file.
-            GameBoard.Create(board, null, false);
-            board.SpawnRandomTile(false);
-            board.SpawnRandomTile(false);
+            GameBoard.Create(board, false);
+            board.SpawnRandomTile();
+            board.SpawnRandomTile();
         }
     }
 
@@ -193,11 +193,11 @@ public class TwentyFortyEight : MonoBehaviour {
         }
 
         if(Input.GetKeyUp(KeyCode.R)) {
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene(sceneBuildIndex: 0);
         }
 
         if(Input.GetKeyDown(KeyCode.T)) {
-            board.SpawnRandomTile(false);
+            board.SpawnRandomTile();
         }
 
         if(Input.GetKeyUp(KeyCode.Z) && board.spawnedTile) {
@@ -267,10 +267,10 @@ public class TwentyFortyEight : MonoBehaviour {
         var move = new MoveData();
         switch(saveData.previousSwipe.direction) {
             case Direction.TOP_TO_BOTTOM:
-                move = saveData.previousSwipe.invert ? MoveData.UpData : MoveData.DownData;
+                move = saveData.previousSwipe.invert ? MoveData.Up : MoveData.Down;
                 break;
             case Direction.LEFT_TO_RIGHT:
-                move = saveData.previousSwipe.invert ? MoveData.LeftData : MoveData.RightData;
+                move = saveData.previousSwipe.invert ? MoveData.Right : MoveData.Left;
                 break;
         }
         for(int i = 0; i < board.size; i++) {
@@ -318,12 +318,12 @@ public class TwentyFortyEight : MonoBehaviour {
 
     public void OnTilesFinishedLerp() {
         if(isUndoing) {
-            isUndoing             = false;
+            isUndoing           = false;
             saveData.score      = saveData.previousScore;
             scoreText.text      = saveData.score.ToString();
         }
         else {
-            board.spawnedTile   = board.SpawnRandomTile(true);
+            board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
             saveData.score      += deltaScore;
             deltaScore          = 0;
 
@@ -333,44 +333,36 @@ public class TwentyFortyEight : MonoBehaviour {
             }
 
             scoreText.text      = saveData.score.ToString();
-            CheckGameStatus();
+            
+            PlayerPrefs.SetInt("best", (int)bestScore);
+            CheckForWinOrLose();
         }
 
-        isMoving                  = false;
+        isMoving                = false;
         undoButton.interactable = saveData.canUndo;
-        saveLoad.Save(this);
-        
         phase                   = GamePhase.GETTING_INPUT;
+        
+        saveLoad.Save(game: this);
     }
 
-    void CheckGameStatus() {
-        SaveScores();
-        var isBoardFull = true;
+    void CheckForWinOrLose() {
         foreach(var tile in board.tiles) {
-            if(!tile) {
-                isBoardFull = false;
-                continue;
-            }
-            if(tile.value >= winningNumber) {
-                OnGameWon();
+            if(tile && tile.value >= winningNumber) {
+                GameWon();
                 return;
             }
         }
 
-        if(isBoardFull) {
-            if(!CanAMoveBeMade())
-                OnGameOver();
+        if(!CanMoveAtAll()) {
+            GameOver();
         }
     }
 
-    void SaveScores() {
-        PlayerPrefs.SetInt("best", (int)bestScore);
+    void GameWon() {
     }
 
-    void OnGameWon() {
-    }
-
-    void OnGameOver() {
+    void GameOver() {
+        Debug.Log("GameOver!");
     }
 
     void MoveTiles() {
@@ -378,7 +370,7 @@ public class TwentyFortyEight : MonoBehaviour {
             return;
         }
         
-        if(!CanAMoveBeMade()) {
+        if(!CanMove(currentSwipe)) {
             return;
         }
         
@@ -443,18 +435,53 @@ public class TwentyFortyEight : MonoBehaviour {
         return prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged;
     }
 
-    bool CanAMoveBeMade() {
+    bool CanMove(in SwipeData swipeData) {
         int count = board.tiles.Count;
         for(int i = 0; i < count; i++) {
-            Tile t = board.tiles[i];
-            if(CanMoveOrMergeTile(t)) {
+            if(CanTileMoveOrMerge(board.tiles[i], swipeData)) {
                 return true;
             }
         }
         return false;
     }
+    
+    bool CanMoveAtAll() {
+        return
+            CanMove(GetSwipeUp())   ||
+            CanMove(GetSwipeDown()) ||
+            CanMove(GetSwipeLeft()) ||
+            CanMove(GetSwipeRight());
+    }
 
-    bool CanMoveOrMergeTile(in Tile tile) {
+    static SwipeData GetSwipeUp() {
+        return new SwipeData {
+            direction   = Direction.TOP_TO_BOTTOM,
+            invert      = true,
+        };
+    }
+    
+    static SwipeData GetSwipeDown() {
+        return new SwipeData {
+            direction   = Direction.TOP_TO_BOTTOM,
+            invert      = false,
+        };
+    }
+
+    static SwipeData GetSwipeLeft() {
+        return new SwipeData {
+            direction   = Direction.LEFT_TO_RIGHT,
+            invert      = false,
+        };
+    }
+
+    static SwipeData GetSwipeRight() {
+        return new SwipeData {
+            direction   = Direction.LEFT_TO_RIGHT,
+            invert      = true,
+        };
+    }
+
+    bool CanTileMoveOrMerge(in Tile tile, in SwipeData swipeData) {
         if(!tile) {
             return false;
         }
@@ -463,40 +490,36 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        Tile query = board.GetNextTile(tile, currentSwipe);
+        Tile query = board.GetNextTile(tile, swipeData);
         if(query && tile.value == query.value) {
             return true;
         }
         
-        Index i = board.GetNextEmptyIndex(tile, currentSwipe);
+        Index i = board.GetNextEmptyIndex(tile, swipeData);
         return i.x != -1 && i.y != -1;
     }
 
     public void SwipeUp() {
-        currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
-        currentSwipe.invert     = true;
-        currentMove             = MoveData.UpData;
+        currentSwipe = GetSwipeUp();
+        currentMove  = MoveData.Up;
         MoveTiles();
     }
 
     public void SwipeDown() {
-        currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
-        currentSwipe.invert     = false;
-        currentMove             = MoveData.DownData;
+        currentSwipe = GetSwipeDown();
+        currentMove  = MoveData.Down;
         MoveTiles();
     }
 
     public void SwipeLeft() {
-        currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
-        currentSwipe.invert     = false;
-        currentMove             = MoveData.RightData;
+        currentSwipe = GetSwipeLeft();
+        currentMove  = MoveData.Left;
         MoveTiles();
     }
 
     public void SwipeRight() {
-        currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
-        currentSwipe.invert     = true;
-        currentMove             = MoveData.LeftData;
+        currentSwipe = GetSwipeRight();
+        currentMove  = MoveData.Right;
         MoveTiles();
     }
 
@@ -512,7 +535,7 @@ public class TwentyFortyEight : MonoBehaviour {
             DeactivateTile(i, board.removedTiles[i]);
         }
 
-        saveLoad.InitGame(board, true);
+        saveLoad.InitGame(board, isNewGame: true);
     }
 
     void DeactivateTile(in int i, in Tile t) {

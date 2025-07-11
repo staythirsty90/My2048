@@ -33,7 +33,7 @@ public struct MoveData {
     }
 
     public static void Init(in int size) {
-        UpData = new MoveData {
+        Up = new MoveData {
             xDir = 0,
             yDir = 1,
             startX = 0,
@@ -44,7 +44,7 @@ public struct MoveData {
             yRowShift = 0
         };
 
-        DownData = new MoveData {
+        Down = new MoveData {
             xDir = 0,
             yDir = -1,
             startX = 0,
@@ -55,7 +55,18 @@ public struct MoveData {
             yRowShift = 0
         };
 
-        LeftData = new MoveData {
+        Left = new MoveData {
+            xDir = -1,
+            yDir = 0,
+            startX = size - 1,
+            startY = 0,
+            endX = 0,
+            endY = 0,
+            xRowShift = 0,
+            yRowShift = 1
+        };
+
+        Right = new MoveData {
             xDir = 1,
             yDir = 0,
             startX = 0,
@@ -66,22 +77,12 @@ public struct MoveData {
             yRowShift = 1
         };
 
-        RightData = new MoveData {
-            xDir = -1,
-            yDir = 0,
-            startX = size - 1,
-            startY = 0,
-            endX = 0,
-            endY = 0,
-            xRowShift = 0,
-            yRowShift = 1
-        };
     }
 
-    public static MoveData UpData;
-    public static MoveData DownData;
-    public static MoveData LeftData;
-    public static MoveData RightData;
+    public static MoveData Up;
+    public static MoveData Down;
+    public static MoveData Left;
+    public static MoveData Right;
 
     public override string ToString() {
         return string.Format("xDir: {0}, yDir: {1}, startX: {2}, startY: {3}, endX: {4}, endY: {5}, xRowShift:{6}, yRowShift:{7}",

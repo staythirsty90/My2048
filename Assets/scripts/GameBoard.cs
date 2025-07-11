@@ -54,22 +54,22 @@ public class GameBoard {
         }
     }
 
-    public static void Create(GameBoard g, GameObject go, bool isNewGame) {
-        g.length        = g.size * g.size;
-        g.positions     = new Vector2[g.length];
-        g.tiles         = new List<Tile>(g.length);
-        g.removedTiles  = new List<Tile>(g.length);;
+    public static void Create(GameBoard gb, bool isNewGame) {
+        gb.length        = gb.size * gb.size;
+        gb.positions     = new Vector2[gb.length];
+        gb.tiles         = new List<Tile>(gb.length);
+        gb.removedTiles  = new List<Tile>(gb.length);;
 
         if(!isNewGame) {
-            InitializePool(g);
+            InitializePool(gb);
         }
 
-        for (int x = 0; x < g.size; x++) {
-            for (int y = 0; y < g.size; y++) {
-                int i = x + y * g.size;
-                g.positions[i] = new Vector2(x, y);
-                g.tiles.Add(null);
-                g.removedTiles.Add(null);
+        for (int x = 0; x < gb.size; x++) {
+            for (int y = 0; y < gb.size; y++) {
+                int i = x + y * gb.size;
+                gb.positions[i] = new Vector2(x, y);
+                gb.tiles.Add(null);
+                gb.removedTiles.Add(null);
                 
             }
         }
@@ -91,7 +91,7 @@ public class GameBoard {
         return t;
     }
 
-    public static void Load(GameBoard gb, GameObject go, SaveData gd, bool isNewGame) {
+    public static void Load(GameBoard gb, SaveData gd, bool isNewGame) {
         gb.size         = gd.size;
         gb.length       = gd.activeTileData.Length;
         gb.positions    = new Vector2[gb.length];
