@@ -300,6 +300,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
                 board.removedTiles[board.GetIFromIndex(r)] = null;
                 r.Undo();
+                t.SetSprite();
                 t.ResetFlagsAndIndex();
                 r.ResetFlagsAndIndex();
                 r.index                                 = r.currentMove.index;
