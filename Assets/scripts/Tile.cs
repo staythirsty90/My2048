@@ -29,6 +29,13 @@ public class Tile : MonoBehaviour {
         DebugSetGameObjectName(this);
     }
 
+    public void InitLerp(in float lerpDuration) {
+        lerpData.timeStarted     = Time.time;
+        lerpData.start           = transform.position;
+        lerpData.lerpDuration    = lerpDuration;
+        lerpData.t               = 0f;
+    }
+
     public void Lerp() {
         float timeSinceStarted = Time.time - lerpData.timeStarted;
         lerpData.t = timeSinceStarted / lerpData.lerpDuration;

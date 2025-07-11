@@ -60,6 +60,7 @@
      <Compile Include="Assets\scripts\GameBoard.cs" />
      <Compile Include="Assets\scripts\TwentyFortyEight.cs" />
      <Compile Include="Assets\scripts\Structs.cs" />
+     <Compile Include="Assets\scripts\MyInput.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
  </Reference>

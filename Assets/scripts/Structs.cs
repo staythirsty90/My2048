@@ -21,7 +21,9 @@ public struct MoveData {
     public int endY;
     public int xRowShift;
     public int yRowShift;
-    public MoveData(int xDirection, int yDirection, int startX, int startY, int endX, int endY, int xrowshift, int yrowshift) {
+    public SwipeData swipe;
+
+    public MoveData(int xDirection, int yDirection, int startX, int startY, int endX, int endY, int xrowshift, int yrowshift, SwipeData swipe) {
         xDir = xDirection;
         yDir = yDirection;
         this.startX = startX;
@@ -30,6 +32,7 @@ public struct MoveData {
         this.endY = endY;
         xRowShift = xrowshift;
         yRowShift = yrowshift;
+        this.swipe = swipe;
     }
 
     public static void Init(in int size) {
@@ -41,7 +44,9 @@ public struct MoveData {
             endX = 0,
             endY = size - 1,
             xRowShift = 1,
-            yRowShift = 0
+            yRowShift = 0,
+
+            swipe = GetSwipeUp,
         };
 
         Down = new MoveData {
@@ -52,7 +57,9 @@ public struct MoveData {
             endX = 0,
             endY = 0,
             xRowShift = 1,
-            yRowShift = 0
+            yRowShift = 0,
+
+            swipe = GetSwipeDown,
         };
 
         Left = new MoveData {
@@ -63,7 +70,9 @@ public struct MoveData {
             endX = 0,
             endY = 0,
             xRowShift = 0,
-            yRowShift = 1
+            yRowShift = 1,
+
+            swipe = GetSwipeLeft,
         };
 
         Right = new MoveData {
@@ -74,7 +83,9 @@ public struct MoveData {
             endX = size - 1,
             endY = 0,
             xRowShift = 0,
-            yRowShift = 1
+            yRowShift = 1,
+
+            swipe = GetSwipeRight,
         };
 
     }
@@ -83,6 +94,29 @@ public struct MoveData {
     public static MoveData Down;
     public static MoveData Left;
     public static MoveData Right;
+
+    public static SwipeData GetSwipeUp => new SwipeData {
+            direction   = Direction.TOP_TO_BOTTOM,
+            invert      = true,
+        };
+    
+    public static SwipeData GetSwipeDown => 
+        new SwipeData {
+            direction   = Direction.TOP_TO_BOTTOM,
+            invert      = false,
+        };
+
+    public static SwipeData GetSwipeLeft => 
+        new SwipeData {
+            direction   = Direction.LEFT_TO_RIGHT,
+            invert      = false,
+        };
+
+    public static SwipeData GetSwipeRight =>
+        new SwipeData {
+            direction   = Direction.LEFT_TO_RIGHT,
+            invert      = true,
+        };
 
     public override string ToString() {
         return string.Format("xDir: {0}, yDir: {1}, startX: {2}, startY: {3}, endX: {4}, endY: {5}, xRowShift:{6}, yRowShift:{7}",
