@@ -73,7 +73,7 @@ public class Tile : MonoBehaviour {
         currentMove.removed = true;
     }
 
-    public void Reset() {
+    public void Deactivate() {
         ResetFlagsAndIndex();
         value = 0;
         gameObject.SetActive(false);

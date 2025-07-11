@@ -276,7 +276,7 @@ public class GameBoard {
         if(!tilePool.Contains(t)) {
             tilePool.Add(t);
         }
-        t.Reset();
+        t.Deactivate();
     }
 
     public void ClearRemovedTiles() {

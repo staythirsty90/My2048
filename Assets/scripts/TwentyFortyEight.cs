@@ -25,7 +25,7 @@ public class TwentyFortyEight : MonoBehaviour {
     Vector2 swipeDelta;
     bool isUndoing;
     bool isMoving;
-    MoveData move;
+    MoveData currentMove;
     Stack<Tile> tileStack;
     GamePhase phase = GamePhase.GETTING_INPUT;
     SwipeData currentSwipe;
@@ -200,9 +200,8 @@ public class TwentyFortyEight : MonoBehaviour {
             board.SpawnRandomTile(false);
         }
 
-        if(Input.GetKeyUp(KeyCode.Z)) {
-            if(board.spawnedTile)
-                board.spawnedTile.Shrink();
+        if(Input.GetKeyUp(KeyCode.Z) && board.spawnedTile) {
+            board.spawnedTile.Shrink();
         }
         #endif
     }
@@ -312,9 +311,9 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void RestoreTile(Tile t) {
         t.Undo();
-        t.index = t.currentMove.index;
-        board[t.currentMove.index] = t;
-        t.lerpData.end = board.GetWorldPos(t.currentMove.index);
+        t.index                     = t.currentMove.index;
+        board[t.currentMove.index]  = t;
+        t.lerpData.end              = board.GetWorldPos(t.currentMove.index);
     }
 
     public void OnTilesFinishedLerp() {
@@ -378,17 +377,21 @@ public class TwentyFortyEight : MonoBehaviour {
         if(isMoving) {
             return;
         }
+        
         if(!CanAMoveBeMade()) {
             return;
         }
+        
         saveData.previousSwipe  = currentSwipe;
         saveData.previousScore  = saveData.score;
-        isMoving                  = true;
+        isMoving                = true;
         saveData.canUndo        = true;
+
         board.ClearRemovedTiles();
+
         for(int i = 0; i < board.size; i++) {
-            int x = move.startX + i * move.xRowShift;
-            int y = move.startY + i * move.yRowShift;
+            int x = currentMove.startX + i * currentMove.xRowShift;
+            int y = currentMove.startY + i * currentMove.yRowShift;
             for(int j = 0; j < board.size; j++) {
                 Tile t = board[x, y];
                 if(t) {
@@ -396,14 +399,16 @@ public class TwentyFortyEight : MonoBehaviour {
                     t.ResetFlagsAndIndex();
                     board[x, y] = null;
                 }
-                x += move.xDir;
-                y += move.yDir;
+                x += currentMove.xDir;
+                y += currentMove.yDir;
             }
 
-            x = move.endX + i * move.xRowShift;
-            y = move.endY + i * move.yRowShift;
+            x = currentMove.endX + i * currentMove.xRowShift;
+            y = currentMove.endY + i * currentMove.yRowShift;
+
             Tile prevTile = null;
             int tileCount = tileStack.Count;
+
             for(int j = 0; j < tileCount; j++) {
                 Tile tile = tileStack.Pop();
 
@@ -423,12 +428,13 @@ public class TwentyFortyEight : MonoBehaviour {
                 board[tile.index]       = tile;
                 tile.lerpData.end       = board.GetWorldPos(x, y);
                 prevTile                = tile;
-                x                       -= move.xDir;
-                y                       -= move.yDir;
+                x                       -= currentMove.xDir;
+                y                       -= currentMove.yDir;
 
                 Tile.DebugSetGameObjectName(tile);
             }
         }
+
         InitializeLerp();
         phase = GamePhase.LERPING_TILES;
     }
@@ -469,28 +475,28 @@ public class TwentyFortyEight : MonoBehaviour {
     public void SwipeUp() {
         currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert     = true;
-        move                    = MoveData.UpData;
+        currentMove             = MoveData.UpData;
         MoveTiles();
     }
 
     public void SwipeDown() {
         currentSwipe.direction  = Direction.TOP_TO_BOTTOM;
         currentSwipe.invert     = false;
-        move                    = MoveData.DownData;
+        currentMove             = MoveData.DownData;
         MoveTiles();
     }
 
     public void SwipeLeft() {
         currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert     = false;
-        move                    = MoveData.RightData;
+        currentMove             = MoveData.RightData;
         MoveTiles();
     }
 
     public void SwipeRight() {
         currentSwipe.direction  = Direction.LEFT_TO_RIGHT;
         currentSwipe.invert     = true;
-        move                    = MoveData.LeftData;
+        currentMove             = MoveData.LeftData;
         MoveTiles();
     }
 
@@ -502,21 +508,17 @@ public class TwentyFortyEight : MonoBehaviour {
         isUndoing               = false;
 
         for(int i = 0; i < board.length; i++) {
-            Tile t = board.tiles[i];
-            if(!t) {
-                continue;
-            }
-            t.Reset();
-            board.tiles[i] = null;
-
-            t = board.removedTiles[i];
-            if(!t) {
-                continue;
-            }
-            t.Reset();
-            board.removedTiles[i] = null;
+            DeactivateTile(i, board.tiles[i]);
+            DeactivateTile(i, board.removedTiles[i]);
         }
+
         saveLoad.InitGame(board, true);
+    }
+
+    void DeactivateTile(in int i, in Tile t) {
+        if(!t) return;
+        t.Deactivate();
+        board.tiles[i] = null;
     }
 
     public void UndoPressed() {
