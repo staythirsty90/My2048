@@ -405,19 +405,18 @@ public class TwentyFortyEight : MonoBehaviour {
             int tileCount = tileStack.Count;
             for(int j = 0; j < tileCount; j++) {
                 Tile tile = tileStack.Pop();
-                
-                if(prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged) {
+
+                if(CanMerge(prevTile, tile)) {
                     prevTile.MergeWith(tile);
-                    deltaScore                                  += prevTile.value;
-                    tile.currentMove.index                      = tile.index;
-                    board[tile.currentMove.index]               = null;
-                    board.removedTiles[board.GetIFromIndex(tile)]  = tile;
-                    tile.lerpData.end                           = prevTile.lerpData.end;
+                    deltaScore                                      += prevTile.value;
+                    tile.currentMove.index                          = tile.index;
+                    board.removedTiles[board.GetIFromIndex(tile)]   = tile;
+                    tile.lerpData.end                               = prevTile.lerpData.end;
 
                     Tile.DebugSetGameObjectName(prevTile);
                     continue;
                 }
-                
+
                 tile.currentMove.index  = tile.index;
                 tile.index              = new Index(x, y);
                 board[tile.index]       = tile;
@@ -425,11 +424,16 @@ public class TwentyFortyEight : MonoBehaviour {
                 prevTile                = tile;
                 x                       -= move.xDir;
                 y                       -= move.yDir;
+
                 Tile.DebugSetGameObjectName(tile);
             }
         }
         InitializeLerp();
         phase = GamePhase.LERPING_TILES;
+    }
+
+    static bool CanMerge(in Tile prevTile, in Tile tile) {
+        return prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged;
     }
 
     bool CanAMoveBeMade() {
