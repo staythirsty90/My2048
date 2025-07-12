@@ -9,7 +9,7 @@ public class GameBoard {
     public List<Tile> tiles;
     public List<Tile> removedTiles;
     public int size;
-    public int length;
+    public int Length { get; private set; }
     public Tile spawnedTile;
     
     List<Tile> tilePool;
@@ -26,7 +26,7 @@ public class GameBoard {
 
     Tile GetTileFromIndex(in int x, in int y) {
         int index = x + y * size;
-        if (index < 0 || index >= length) {
+        if (index < 0 || index >= Length) {
             return null;
         }
         return tiles[index];
@@ -34,14 +34,14 @@ public class GameBoard {
 
     void SetTileFromIndex(in int x, in int y, Tile tile) {
         int index = x + y * size;
-        if (index < 0 || index >= length) {
+        if (index < 0 || index >= Length) {
             return;
         }
         tiles[index] = tile;
     }
 
     public static void InitializePool(GameBoard g) {
-        g.tilePool = new List<Tile>(g.length);
+        g.tilePool = new List<Tile>(g.Length);
         for (int x = 0; x < g.size; x++) {
             for (int y = 0; y < g.size; y++) {
                 Tile t = Object.Instantiate(g.tilePrefab);
@@ -55,10 +55,10 @@ public class GameBoard {
     }
 
     public static void Create(GameBoard gb, bool isNewGame) {
-        gb.length        = gb.size * gb.size;
-        gb.positions     = new Vector2[gb.length];
-        gb.tiles         = new List<Tile>(gb.length);
-        gb.removedTiles  = new List<Tile>(gb.length);;
+        gb.Length        = gb.size * gb.size;
+        gb.positions     = new Vector2[gb.Length];
+        gb.tiles         = new List<Tile>(gb.Length);
+        gb.removedTiles  = new List<Tile>(gb.Length);;
 
         if(!isNewGame) {
             InitializePool(gb);
@@ -93,16 +93,16 @@ public class GameBoard {
 
     public static void Load(GameBoard gb, SaveData gd, bool isNewGame) {
         gb.size         = gd.size;
-        gb.length       = gd.activeTileData.Length;
-        gb.positions    = new Vector2[gb.length];
-        gb.tiles        = new List<Tile>(gb.length);
-        gb.removedTiles = new List<Tile>(gb.length);
+        gb.Length       = gd.activeTileData.Length;
+        gb.positions    = new Vector2[gb.Length];
+        gb.tiles        = new List<Tile>(gb.Length);
+        gb.removedTiles = new List<Tile>(gb.Length);
         
         if(!isNewGame) {
             InitializePool(gb);
         }
 
-        for (int i = 0; i < gb.length; i++) {
+        for (int i = 0; i < gb.Length; i++) {
             gb.tiles.Add(null);
             gb.removedTiles.Add(null);
         }
@@ -178,10 +178,10 @@ public class GameBoard {
     }
 
     public Tile SpawnRandomTile(bool spawnedFromMove = false) {
-        int index = Random.Range(0, length);
+        int index = Random.Range(0, Length);
         float t = 0;
         while (tiles[index]) {
-            index = Random.Range(0, length);
+            index = Random.Range(0, Length);
             t += Time.deltaTime;
             if (t > 100) {
                 Debug.LogWarning("couldn't spawn a random tile because grid is full");

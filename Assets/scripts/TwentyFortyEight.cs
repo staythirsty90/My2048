@@ -356,7 +356,7 @@ public class TwentyFortyEight : MonoBehaviour {
         IsMoving                = false;
         IsUndoing               = false;
 
-        for(int i = 0; i < board.length; i++) {
+        for(int i = 0; i < board.Length; i++) {
             DeactivateTile(i, board.tiles[i]);
             DeactivateTile(i, board.removedTiles[i]);
         }

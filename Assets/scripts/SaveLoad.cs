@@ -29,8 +29,8 @@ namespace My2048 {
             }
             else {
                 GameBoard.Create(gb, isNewGame);
-                data.activeTileData = new TileData[gb.length];
-                data.removedTileData = new TileData[gb.length];
+                data.activeTileData = new TileData[gb.Length];
+                data.removedTileData = new TileData[gb.Length];
                 gb.SpawnRandomTile();
                 gb.SpawnRandomTile();
             }
