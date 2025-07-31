@@ -47,9 +47,6 @@ public class GameBoard {
                 Tile t = Object.Instantiate(g.tilePrefab);
                 t.gameObject.SetActive(false);
                 g.tilePool.Add(t);
-                t = Object.Instantiate(g.tilePrefab);
-                t.gameObject.SetActive(false);
-                g.tilePool.Add(t);
             }
         }
     }
@@ -73,7 +70,6 @@ public class GameBoard {
                 
             }
         }
-
     }
 
     static Tile LoadTile(GameBoard gb, TileData td) {
