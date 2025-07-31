@@ -40,44 +40,47 @@ public class GameBoard {
         tiles[index] = tile;
     }
 
-    public static void InitializePool(GameBoard g) {
-        g.tilePool = new List<Tile>(g.Length);
-        for (int x = 0; x < g.size; x++) {
-            for (int y = 0; y < g.size; y++) {
-                Tile t = Object.Instantiate(g.tilePrefab);
+    /// <summary>
+    /// Creates the Tile GameObjects, deactivates them, and adds them into the GameBoard's tilePool.
+    /// </summary>
+    public void InitializePool() {
+        tilePool = new List<Tile>(Length);
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                Tile t = Object.Instantiate(tilePrefab);
                 t.gameObject.SetActive(false);
-                g.tilePool.Add(t);
+                tilePool.Add(t);
             }
         }
     }
 
-    public static void Create(GameBoard gb, bool isNewGame) {
-        gb.Length        = gb.size * gb.size;
-        gb.positions     = new Vector2[gb.Length];
-        gb.tiles         = new List<Tile>(gb.Length);
-        gb.removedTiles  = new List<Tile>(gb.Length);;
+    public void Create(in bool isNewGame) {
+        Length        = size * size;
+        positions     = new Vector2[Length];
+        tiles         = new List<Tile>(Length);
+        removedTiles  = new List<Tile>(Length);;
 
         if(!isNewGame) {
-            InitializePool(gb);
+            InitializePool();
         }
 
-        for (int x = 0; x < gb.size; x++) {
-            for (int y = 0; y < gb.size; y++) {
-                int i = x + y * gb.size;
-                gb.positions[i] = new Vector2(x, y);
-                gb.tiles.Add(null);
-                gb.removedTiles.Add(null);
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                int i = x + y * size;
+                positions[i] = new Vector2(x, y);
+                tiles.Add(null);
+                removedTiles.Add(null);
                 
             }
         }
     }
 
-    static Tile LoadTile(GameBoard gb, TileData td) {
+    Tile LoadTile(TileData td) {
         if (td.value == 0) {
             return null;
         }
         
-        Tile t                          = gb.GetTileFromPool();
+        Tile t                          = GetTileFromPool();
         t.index                         = td.index;
         t.currentMove.index             = td.oldIndex;
         t.otherTileIndex                = td.otherTileIndex;
@@ -87,61 +90,63 @@ public class GameBoard {
         return t;
     }
 
-    public static void Load(GameBoard gb, SaveData gd, bool isNewGame) {
-        gb.size         = gd.size;
-        gb.Length       = gd.activeTileData.Length;
-        gb.positions    = new Vector2[gb.Length];
-        gb.tiles        = new List<Tile>(gb.Length);
-        gb.removedTiles = new List<Tile>(gb.Length);
+    public void Load(SaveData gd, bool isNewGame) {
+        size         = gd.size;
+        Length       = gd.activeTileData.Length;
+        positions    = new Vector2[Length];
+        tiles        = new List<Tile>(Length);
+        removedTiles = new List<Tile>(Length);
         
         if(!isNewGame) {
-            InitializePool(gb);
+            InitializePool();
         }
 
-        for (int i = 0; i < gb.Length; i++) {
-            gb.tiles.Add(null);
-            gb.removedTiles.Add(null);
+        for (int i = 0; i < Length; i++) {
+            tiles.Add(null);
+            removedTiles.Add(null);
         }
 
-        for (int x = 0; x < gb.size; x++) {
-            for (int y = 0; y < gb.size; y++) {
-                int i           = x + y * gb.size;
-                gb.positions[i] = new Vector2(x, y);
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                int i           = x + y * size;
+                positions[i] = new Vector2(x, y);
 
                 TileData td = gd.removedTileData[i];
-                Tile r      = LoadTile(gb, td);
+                Tile r      = LoadTile(td);
                 if (r) {
                     r.gameObject.SetActive(false);
                     r.SetSprite();
                     r.currentMove.removed       = true;
-                    r.lerpData.end              = gb.GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
-                    gb.removedTiles[i]          = r;
+                    r.lerpData.end              = GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
+                    removedTiles[i]          = r;
                 }
             }
         }
 
-        for (int x = 0; x < gb.size; x++) {
-            for (int y = 0; y < gb.size; y++) {
-                int i       = x + y * gb.size;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                int i       = x + y * size;
                 TileData td = gd.activeTileData[i];
-                Tile t      = LoadTile(gb, td);
-                if (t) {
-                    if (t.currentMove.spawnedFromMove) {
-                        gb.spawnedTile = t;
-                    }
-                    if (t.currentMove.merged) {
-                        Tile r = gb.removedTiles[gb.GetOtherIFromIndex(t)];
-                        if(r) {
-                            t.otherTileIndex = r.index;
-                            r.otherTileIndex = t.index;
-                            r.transform.position = gb.GetWorldPos(r.otherTileIndex);
-                        }
-                    }
-                    t.SetSprite();
-                    t.transform.position = gb.positions[i];
-                    t.lerpData.end       = gb.GetWorldPos(t.index.x, t.index.y);
-                    gb[x, y]             = t;
+                Tile t      = LoadTile(td);
+                if (!t) {
+                    continue;
                 }
+                if (t.currentMove.spawnedFromMove) {
+                    spawnedTile = t;
+                }
+                if (t.currentMove.merged) {
+                    Tile r = removedTiles[GetOtherIFromIndex(t)];
+                    if(!r) {
+                        continue;
+                    }
+                    t.otherTileIndex = r.index;
+                    r.otherTileIndex = t.index;
+                    r.transform.position = GetWorldPos(r.otherTileIndex);
+                }
+                t.SetSprite();
+                t.transform.position = positions[i];
+                t.lerpData.end       = GetWorldPos(t.index.x, t.index.y);
+                this[x, y]           = t;
             }
         }
     }

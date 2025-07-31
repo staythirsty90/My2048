@@ -44,7 +44,7 @@ public class TwentyFortyEight : MonoBehaviour {
 
         if(saveData.activeTileData == null) {
             // There was no save file.
-            GameBoard.Create(board, false);
+            board.Create(isNewGame: false);
             board.SpawnRandomTile();
             board.SpawnRandomTile();
         }

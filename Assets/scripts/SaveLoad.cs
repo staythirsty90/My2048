@@ -28,7 +28,7 @@ namespace My2048 {
                 LoadBoard(gb, isNewGame);
             }
             else {
-                GameBoard.Create(gb, isNewGame);
+                gb.Create(isNewGame);
                 data.activeTileData = new TileData[gb.Length];
                 data.removedTileData = new TileData[gb.Length];
                 gb.SpawnRandomTile();
@@ -37,7 +37,7 @@ namespace My2048 {
         }
 
         void LoadBoard(GameBoard gb, in bool isNewGame) {
-            GameBoard.Load(gb, data, isNewGame);
+            gb.Load(data, isNewGame);
         }
         
         bool TryLoad() {
