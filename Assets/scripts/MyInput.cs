@@ -4,38 +4,34 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace My2048 {
-    [RequireComponent(typeof(TwentyFortyEight))]
-    public class MyInput : MonoBehaviour {
-        TwentyFortyEight game;
+    
+    public static class MyInput {
 
-        Vector2 startTouch;
-        Vector2 swipeDelta;
-
-        void Awake() {
-            game = GetComponent<TwentyFortyEight>();
-        }
-
-        public void HandleInput() {
+        public static Vector2 HandleInput(in TwentyFortyEight game) {
             if(game.IsMoving || game.IsUndoing) {
-                return;
+                return default;
             }
+
+            var swipeDelta = Vector2.zero;
+            var startTouch = Vector2.zero;
+
             #region Swipe Input
             if(Input.GetMouseButtonDown(0)) {
                 if(IsTouchOverUIButton()) {
-                    return;
+                    return default;
                 }
                 startTouch = Input.mousePosition;
             }
             else if(Input.GetMouseButtonUp(0)) {
                 swipeDelta = (Vector2)Input.mousePosition - startTouch;
-                TrySwipe();
+                TrySwipe(startTouch, swipeDelta, game);
             }
 
             if(Input.touchCount != 0) {
                 Touch touch = Input.GetTouch(0);
                 if(touch.phase == TouchPhase.Began) {
                     if(IsTouchOverUIButton()) {
-                        return;
+                        return default;
                     }
                     startTouch = touch.position;
                 }
@@ -44,7 +40,7 @@ namespace My2048 {
                     if(startTouch != Vector2.zero) {
                         swipeDelta = touch.position - startTouch;
                     }
-                    TrySwipe();
+                    TrySwipe(startTouch, swipeDelta, game);
                     startTouch = swipeDelta = Vector2.zero;
                 }
             }
@@ -52,19 +48,19 @@ namespace My2048 {
 
 #if UNITY_EDITOR
             if(Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow)) {
-                game.MoveTiles(MoveData.Up);
+                return Vector2.up;
             }
 
             if(Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) {
-                game.MoveTiles(MoveData.Down);
+                return Vector2.down;
             }
 
             if(Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) {
-                game.MoveTiles(MoveData.Right);
+                return Vector2.right;
             }
 
             if(Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) {
-                game.MoveTiles(MoveData.Left);
+                return Vector2.left;
             }
 
             if(Input.GetKeyUp(KeyCode.R)) {
@@ -78,10 +74,12 @@ namespace My2048 {
             if(Input.GetKeyUp(KeyCode.Z) && game.board.spawnedTile) {
                 game.board.spawnedTile.Shrink();
             }
+
+            return default;
 #endif
         }
 
-        public void TrySwipe() {
+        public static void TrySwipe(Vector2 startTouch, Vector2 swipeDelta, in TwentyFortyEight game) {
             if(startTouch == Vector2.zero) {
                 return;
             }
@@ -112,8 +110,8 @@ namespace My2048 {
             }
         }
 
-        List<RaycastResult> results = new List<RaycastResult>(2);
-        public bool IsTouchOverUIButton() {
+        static List<RaycastResult> results = new List<RaycastResult>(2);
+        public static bool IsTouchOverUIButton() {
             results.Clear();
             var p = new PointerEventData(EventSystem.current) {
                 position = Input.mousePosition

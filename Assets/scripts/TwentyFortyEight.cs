@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(MyInput))]
 public class TwentyFortyEight : MonoBehaviour {
     public int      TouchDeadZone           = 60;
     public float    TouchMaxHeightPercent   = 90;
@@ -24,12 +23,6 @@ public class TwentyFortyEight : MonoBehaviour {
 
     Stack<Tile> tileStack;
     GamePhase phase;
-    MyInput myInput;
-
-    void Awake() {
-        myInput  = GetComponent<MyInput>();
-    }
-
     void Start() {
         MoveData.Init(board.size);
 
@@ -51,8 +44,28 @@ public class TwentyFortyEight : MonoBehaviour {
     void Update() {
         switch(phase) {
             case GamePhase.GETTING_INPUT:
-                myInput.HandleInput();
+
+                var moveDir = MyInput.HandleInput(game: this);
+
+                if(moveDir == Vector2.up) {
+                    MoveTiles(MoveData.Up);
+                }
+                else if(moveDir == Vector2.down) {
+                    MoveTiles(MoveData.Down);
+                }
+                else if(moveDir == Vector2.right) {
+                    MoveTiles(MoveData.Right);
+                }
+                else if(moveDir == Vector2.left) {
+                    MoveTiles(MoveData.Left);
+                }
+
+                if(moveDir != Vector2.zero) {
+                    BeginLerpPhase();
+                }
+
                 break;
+
             case GamePhase.LERPING_TILES:
                 LerpTiles();
                 break;
@@ -72,7 +85,7 @@ public class TwentyFortyEight : MonoBehaviour {
         return spriteTiles[i];
     }
 
-    void InitializeLerpPhase() {
+    void BeginLerpPhase() {
         foreach(var t in board.tiles) {
             Tile.InitLerp(t, tileLerpDuration);
         }
@@ -161,7 +174,7 @@ public class TwentyFortyEight : MonoBehaviour {
             }
         }
      
-        InitializeLerpPhase();
+        BeginLerpPhase();
     }
 
     void RestoreTile(Tile t) {
@@ -289,8 +302,6 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile.DebugSetGameObjectName(tile);
             }
         }
-
-        InitializeLerpPhase();
     }
 
     static bool CanMerge(in Tile prevTile, in Tile tile) {
