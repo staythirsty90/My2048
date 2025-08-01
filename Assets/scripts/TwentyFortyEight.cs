@@ -74,13 +74,11 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void InitializeLerp() {
         foreach(var t in board.tiles) {
-            if(t == null) continue;
-            t.InitLerp(tileLerpDuration);
+            Tile.InitLerp(t, tileLerpDuration);
         }
 
         foreach(var t in board.removedTiles) {
-            if(t == null) continue;
-            t.InitLerp(tileLerpDuration);
+            Tile.InitLerp(t, tileLerpDuration);
         }
     }
 
@@ -96,27 +94,6 @@ public class TwentyFortyEight : MonoBehaviour {
         }
 
         if(!isLerping) {
-            // All tiles have completing their Lerping.
-            foreach(var t in board.tiles) {
-                if(!t) {
-                    continue;
-                }
-                t.transform.position = t.lerpData.end;
-                if(t.currentMove.merged) {
-                    t.animator.SetTrigger("merge");
-                }
-                t.SetSprite();
-            }
-
-            foreach(var t in board.removedTiles) {
-                if(!t) {
-                    continue;
-                }
-                t.transform.position = t.lerpData.end;
-                t.gameObject.SetActive(false);
-                t.SetSprite();
-            }
-
             OnTilesFinishedLerp();
         }
     }
@@ -193,6 +170,14 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void OnTilesFinishedLerp() {
+        foreach(var t in board.tiles) {
+            Tile.ActiveTileEndLerp(t);
+        }
+
+        foreach(var t in board.removedTiles) {
+            Tile.RemovedTileEndLerp(t);
+        }
+
         if(IsUndoing) {
             IsUndoing           = false;
             gameState.score     = gameState.previousScore;

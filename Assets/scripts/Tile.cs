@@ -30,17 +30,40 @@ namespace My2048 {
             DebugSetGameObjectName(this);
         }
 
-        public void InitLerp(in float lerpDuration) {
-            lerpData.timeStarted    = Time.time;
-            lerpData.start          = tf.position;
-            lerpData.lerpDuration   = lerpDuration;
-            lerpData.t              = 0f;
-        }
-
         public void Lerp() {
             var timeSinceStarted = Time.time - lerpData.timeStarted;
             lerpData.t  = timeSinceStarted / lerpData.lerpDuration;
             tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
+        }
+
+        public static void ActiveTileEndLerp(Tile t) {
+            if(!t) {
+                return;
+            }
+
+            t.transform.position = t.lerpData.end;
+            t.SetSprite();
+            
+            if(t.currentMove.merged) {
+                t.animator.SetTrigger("merge");
+            }
+        }
+
+        public static void RemovedTileEndLerp(Tile t) {
+            if(!t) {
+                return;
+            }
+            t.transform.position = t.lerpData.end;
+            t.gameObject.SetActive(false);
+            t.SetSprite();
+        }
+
+        public static void InitLerp(Tile t, in float tileLerpDuration) {
+            if(t == null) return;
+            t.lerpData.timeStarted    = Time.time;
+            t.lerpData.start          = t.tf.position;
+            t.lerpData.lerpDuration   = tileLerpDuration;
+            t.lerpData.t              = 0f;
         }
 
         public void SetSprite() {
