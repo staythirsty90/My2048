@@ -31,15 +31,15 @@ namespace My2048 {
         }
 
         public void InitLerp(in float lerpDuration) {
-            lerpData.timeStarted = Time.time;
-            lerpData.start = transform.position;
-            lerpData.lerpDuration = lerpDuration;
-            lerpData.t = 0f;
+            lerpData.timeStarted    = Time.time;
+            lerpData.start          = tf.position;
+            lerpData.lerpDuration   = lerpDuration;
+            lerpData.t              = 0f;
         }
 
         public void Lerp() {
-            float timeSinceStarted = Time.time - lerpData.timeStarted;
-            lerpData.t = timeSinceStarted / lerpData.lerpDuration;
+            var timeSinceStarted = Time.time - lerpData.timeStarted;
+            lerpData.t  = timeSinceStarted / lerpData.lerpDuration;
             tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
         }
 

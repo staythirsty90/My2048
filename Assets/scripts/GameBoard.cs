@@ -67,12 +67,9 @@ namespace My2048 {
 
             InitializePool();
 
-            for(int x = 0; x < size; x++) {
-                for(int y = 0; y < size; y++) {
-                    int i = x + y * size;
-                    tiles.Add(null);
-                    removedTiles.Add(null);
-                }
+            for(int x = 0; x < Length; x++) {
+                tiles.Add(null);
+                removedTiles.Add(null);
             }
         }
 
@@ -82,12 +79,17 @@ namespace My2048 {
             SpawnRandomTile();
         }
 
-        Tile LoadTile(TileData td) {
+        Tile LoadTile(in TileData td) {
             if(td.value == 0) {
                 return null;
             }
 
-            Tile t                          = GetTileFromPool();
+            Tile t = GetTileFromPool();
+
+            if(!t) {
+                throw new System.NullReferenceException("Couldn't file a Tile GameObject from the Tile Pool.");
+            }
+
             t.index                         = td.index;
             t.currentMove.index             = td.oldIndex;
             t.otherTileIndex                = td.otherTileIndex;
@@ -115,7 +117,7 @@ namespace My2048 {
                     int i = x + y * size;
 
                     TileData td = gs.removedTileData[i];
-                    Tile r = LoadTile(td);
+                    Tile r      = LoadTile(td);
                     if(r) {
                         r.gameObject.SetActive(false);
                         r.SetSprite();
