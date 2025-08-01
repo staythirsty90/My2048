@@ -6,7 +6,6 @@ namespace My2048 {
     public class GameBoard {
         public Tile tilePrefab;
         public int seed = 101;
-        public Vector2[] positions;
         public List<Tile> tiles;
         public List<Tile> removedTiles;
         public int size;
@@ -63,7 +62,6 @@ namespace My2048 {
 
         public void Create() {
             Length          = size * size;
-            positions       = new Vector2[Length];
             tiles           = new List<Tile>(Length);
             removedTiles    = new List<Tile>(Length);
 
@@ -72,7 +70,6 @@ namespace My2048 {
             for(int x = 0; x < size; x++) {
                 for(int y = 0; y < size; y++) {
                     int i = x + y * size;
-                    positions[i] = new Vector2(x, y);
                     tiles.Add(null);
                     removedTiles.Add(null);
                 }
@@ -103,7 +100,6 @@ namespace My2048 {
         public void Load(in GameState gs) {
             size            = gs.size;
             Length          = gs.activeTileData.Length;
-            positions       = new Vector2[Length];
             tiles           = new List<Tile>(Length);
             removedTiles    = new List<Tile>(Length);
 
@@ -117,7 +113,6 @@ namespace My2048 {
             for(int x = 0; x < size; x++) {
                 for(int y = 0; y < size; y++) {
                     int i = x + y * size;
-                    positions[i] = new Vector2(x, y);
 
                     TileData td = gs.removedTileData[i];
                     Tile r = LoadTile(td);
@@ -152,8 +147,8 @@ namespace My2048 {
                         r.transform.position = GetWorldPos(r.otherTileIndex);
                     }
                     t.SetSprite();
-                    t.transform.position = positions[i];
-                    t.lerpData.end = GetWorldPos(t.index.x, t.index.y);
+                    t.transform.position = GetWorldPos(t.index);
+                    t.lerpData.end       = GetWorldPos(t.index);
                     this[x, y] = t;
                 }
             }
@@ -177,7 +172,7 @@ namespace My2048 {
             t.value = value;
             t.index = new Index(index % size, index / size);
             t.currentMove.index = t.index;
-            t.MoveToPos(positions[index]);
+            t.transform.position = GetWorldPos(t.index);
             if(spawnedFromMove) {
                 t.Spawn();
                 t.currentMove.spawnedFromMove = true;
@@ -202,11 +197,11 @@ namespace My2048 {
         }
 
         public Vector2 GetWorldPos(in int x, in int y) {
-            return positions[x + y * size];
+            return new Vector2(x, y);
         }
 
         public Vector2 GetWorldPos(in Index index) {
-            return positions[index.x + index.y * size];
+            return new Vector2(index.x, index.y);
         }
 
         public Tile GetNextTile(Tile t, SwipeData swipeData) {

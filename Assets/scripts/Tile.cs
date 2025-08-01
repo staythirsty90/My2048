@@ -43,10 +43,6 @@ namespace My2048 {
             tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
         }
 
-        public void MoveToPos(Vector2 pos) {
-            tf.position = pos;
-        }
-
         public void SetSprite() {
             sr.sprite = game.ValueToTile(value);
             DebugSetGameObjectName(this);
