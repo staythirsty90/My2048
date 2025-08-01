@@ -160,7 +160,12 @@ namespace My2048 {
             return t.otherTileIndex.x + t.otherTileIndex.y * size;
         }
 
-        public int GetIFromIndex(in Tile t) {
+        /// <summary>
+        /// Return the i index from the Tile's Index.x and Index.y
+        /// </summary>
+        /// <param name="t">The tile.</param>
+        /// <returns></returns>
+        public int Get_i(in Tile t) {
             return t.currentMove.index.x + t.currentMove.index.y * size;
         }
 

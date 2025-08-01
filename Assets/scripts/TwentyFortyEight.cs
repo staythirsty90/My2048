@@ -72,7 +72,7 @@ public class TwentyFortyEight : MonoBehaviour {
         return spriteTiles[i];
     }
 
-    void InitializeLerp() {
+    void InitializeLerpPhase() {
         foreach(var t in board.tiles) {
             Tile.InitLerp(t, tileLerpDuration);
         }
@@ -80,6 +80,8 @@ public class TwentyFortyEight : MonoBehaviour {
         foreach(var t in board.removedTiles) {
             Tile.InitLerp(t, tileLerpDuration);
         }
+
+        phase = GamePhase.LERPING_TILES;
     }
 
     void LerpTiles() {
@@ -150,7 +152,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile r                                  = board.removedTiles[board.GetOtherIFromIndex(t)];
                 board[r.currentMove.index]              = r;
                 r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
-                board.removedTiles[board.GetIFromIndex(r)] = null;
+                board.removedTiles[board.Get_i(r)] = null;
                 r.Undo();
                 t.SetSprite();
                 t.ResetFlagsAndIndex();
@@ -158,8 +160,8 @@ public class TwentyFortyEight : MonoBehaviour {
                 r.index                                 = r.currentMove.index;
             }
         }
-        InitializeLerp();
-        phase = GamePhase.LERPING_TILES;
+     
+        InitializeLerpPhase();
     }
 
     void RestoreTile(Tile t) {
@@ -267,10 +269,10 @@ public class TwentyFortyEight : MonoBehaviour {
 
                 if(CanMerge(prevTile, tile)) {
                     prevTile.MergeWith(tile);
-                    deltaScore                                      += prevTile.value;
-                    tile.currentMove.index                          = tile.index;
-                    board.removedTiles[board.GetIFromIndex(tile)]   = tile;
-                    tile.lerpData.end                               = prevTile.lerpData.end;
+                    deltaScore                            += prevTile.value;
+                    tile.currentMove.index                = tile.index;
+                    board.removedTiles[board.Get_i(tile)] = tile;
+                    tile.lerpData.end                     = prevTile.lerpData.end;
 
                     Tile.DebugSetGameObjectName(prevTile);
                     continue;
@@ -288,8 +290,7 @@ public class TwentyFortyEight : MonoBehaviour {
             }
         }
 
-        InitializeLerp();
-        phase = GamePhase.LERPING_TILES;
+        InitializeLerpPhase();
     }
 
     static bool CanMerge(in Tile prevTile, in Tile tile) {
