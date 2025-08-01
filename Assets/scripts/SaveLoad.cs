@@ -5,51 +5,27 @@ using System.IO;
 namespace My2048 {
     public class SaveLoad : MonoBehaviour {
         string savePath;
-        BinaryFormatter bf = new BinaryFormatter();
-        SaveData data;
+        readonly BinaryFormatter bf = new BinaryFormatter();
 
         void Awake() {
             savePath = Application.persistentDataPath + "/save.dat";
         }
 
-        public SaveData Load(GameBoard gb, bool isNewGame = false) {
-            if (!TryLoad()) {
-                Debug.LogWarning("Couldn't Load a saved game, perhaps there wasn't one.");
-                return new SaveData();
-            }
-            else {
-                InitGame(gb, isNewGame);
-            }
-            return data;
-        }
-
-        public void InitGame(GameBoard gb, in bool isNewGame) {
-            if (!isNewGame) {
-                LoadBoard(gb, isNewGame);
-            }
-            else {
-                gb.Create(isNewGame);
-                data.activeTileData = new TileData[gb.Length];
-                data.removedTileData = new TileData[gb.Length];
-                gb.SpawnRandomTile();
-                gb.SpawnRandomTile();
-            }
-        }
-
-        void LoadBoard(GameBoard gb, in bool isNewGame) {
-            gb.Load(data, isNewGame);
-        }
-        
-        bool TryLoad() {
+        public bool TryLoad(out SaveData saveData) {
             if (File.Exists(savePath)) {
-                FileStream file = File.Open(savePath, FileMode.Open);
-                data = (SaveData)bf.Deserialize(file);
+                var file = File.Open(savePath, FileMode.Open);
+                saveData = (SaveData)bf.Deserialize(file);
                 file.Close();
                 return true;
             }
+            else {
+                Debug.LogWarning("Couldn't load a saved game, perhaps there wasn't one.");
+            }
+
+            saveData = default;
             return false;
         }
-
+        
         public void Save(in TwentyFortyEight game) {
 
             var gameData = new SaveData() {

@@ -23,7 +23,7 @@ public class TwentyFortyEight : MonoBehaviour {
     uint deltaScore;
 
     Stack<Tile> tileStack;
-    GamePhase phase = GamePhase.GETTING_INPUT;
+    GamePhase phase;
     SaveLoad saveLoad;
     MyInput myInput;
 
@@ -33,21 +33,21 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void Start() {
-        saveData                = saveLoad.Load(board);
+        MoveData.Init(board.size);
+
+        if(saveLoad.TryLoad(out saveData)) {
+            board.Load(saveData);
+        }
+        else {
+            // Couldn't load the save file.
+            board.CreateBoardAndStartingTiles();
+        }
+
         tileStack               = new Stack<Tile>(board.size);
         bestScore               = (uint)PlayerPrefs.GetInt("best");
         bestText.text           = bestScore.ToString();
         scoreText.text          = saveData.score.ToString();
         undoButton.interactable = saveData.canUndo;
-
-        MoveData.Init(board.size);
-
-        if(saveData.activeTileData == null) {
-            // There was no save file.
-            board.Create(isNewGame: false);
-            board.SpawnRandomTile();
-            board.SpawnRandomTile();
-        }
     }
 
     void Update() {
@@ -123,7 +123,7 @@ public class TwentyFortyEight : MonoBehaviour {
         }
     }
 
-    void CheckLerp(ref bool lerping, Tile t) {
+    void CheckLerp(ref bool lerping, in Tile t) {
         if(t && t.lerpData.t < 1) {
             t.Lerp();
             lerping = true;
@@ -350,18 +350,20 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void NewGamePressed() {
-        saveData.score          = 0;
-        saveData.previousScore  = 0;
-        saveData.canUndo        = false;
-        IsMoving                = false;
-        IsUndoing               = false;
+        saveData.score              = 0;
+        saveData.previousScore      = 0;
+        saveData.canUndo            = false;
+        IsMoving                    = false;
+        IsUndoing                   = false;
+        saveData.activeTileData     = new TileData[board.Length];
+        saveData.removedTileData    = new TileData[board.Length];
 
         for(int i = 0; i < board.Length; i++) {
             DeactivateTile(i, board.tiles[i]);
             DeactivateTile(i, board.removedTiles[i]);
         }
 
-        saveLoad.InitGame(board, isNewGame: true);
+        board.CreateBoardAndStartingTiles();
     }
 
     void DeactivateTile(in int i, in Tile t) {
