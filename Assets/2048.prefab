@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4532380537393226}
   - component: {fileID: 114609534934906924}
-  - component: {fileID: 6541096947385674224}
   - component: {fileID: 8493582194171632362}
   m_Layer: 0
   m_Name: 2048
@@ -92,20 +91,7 @@ MonoBehaviour:
     removedTiles:
     - {fileID: 0}
     size: 4
-    length: 0
     spawnedTile: {fileID: 0}
---- !u!114 &6541096947385674224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1966543587134878}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 679ca1203e7147441a37a79e5a9d349f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8493582194171632362
 MonoBehaviour:
   m_ObjectHideFlags: 0

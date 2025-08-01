@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(SaveLoad), typeof(MyInput))]
+[RequireComponent(typeof(MyInput))]
 public class TwentyFortyEight : MonoBehaviour {
     public int      TouchDeadZone           = 60;
     public float    TouchMaxHeightPercent   = 90;
@@ -24,18 +24,16 @@ public class TwentyFortyEight : MonoBehaviour {
 
     Stack<Tile> tileStack;
     GamePhase phase;
-    SaveLoad saveLoad;
     MyInput myInput;
 
     void Awake() {
-        saveLoad = GetComponent<SaveLoad>();
         myInput  = GetComponent<MyInput>();
     }
 
     void Start() {
         MoveData.Init(board.size);
 
-        if(saveLoad.TryLoad(out saveData)) {
+        if(SaveLoad.TryLoad(out saveData)) {
             board.Load(saveData);
         }
         else {
@@ -220,7 +218,7 @@ public class TwentyFortyEight : MonoBehaviour {
         undoButton.interactable = saveData.canUndo;
         phase                   = GamePhase.GETTING_INPUT;
         
-        saveLoad.Save(game: this);
+        SaveLoad.Save(game: this);
     }
 
     void CheckForWinOrLose() {

@@ -828,7 +828,8 @@ PrefabInstance:
       propertyPath: undoButton
       value: 
       objectReference: {fileID: 1150482143}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6541096947385674224, guid: 58f33ea65a4d86e4bb09886e471022e4, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 58f33ea65a4d86e4bb09886e471022e4, type: 3}
 --- !u!1 &713785046
 GameObject:

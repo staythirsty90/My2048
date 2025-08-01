@@ -3,17 +3,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 namespace My2048 {
-    public class SaveLoad : MonoBehaviour {
-        string savePath;
-        readonly BinaryFormatter bf = new BinaryFormatter();
+    public static class SaveLoad {
+        static string SavePath => $"{Application.persistentDataPath}/save.dat";
+        static readonly BinaryFormatter bf = new BinaryFormatter();
 
-        void Awake() {
-            savePath = Application.persistentDataPath + "/save.dat";
-        }
+        public static bool TryLoad(out SaveData saveData) {
 
-        public bool TryLoad(out SaveData saveData) {
-            if (File.Exists(savePath)) {
-                var file = File.Open(savePath, FileMode.Open);
+            if (File.Exists(SavePath)) {
+                var file = File.Open(SavePath, FileMode.Open);
                 saveData = (SaveData)bf.Deserialize(file);
                 file.Close();
                 return true;
@@ -26,7 +23,7 @@ namespace My2048 {
             return false;
         }
         
-        public void Save(in TwentyFortyEight game) {
+        public static void Save(in TwentyFortyEight game) {
 
             var gameData = new SaveData() {
                 canUndo         = game.saveData.canUndo,
@@ -39,7 +36,7 @@ namespace My2048 {
             TileData.FillTileData(ref gameData.activeTileData, game.board.tiles);
             TileData.FillTileDataRemoved(ref gameData.removedTileData, game.board.removedTiles);
             
-            var file = File.Create(savePath);
+            var file = File.Create(SavePath);
             bf.Serialize(file, gameData);
             file.Close();
         }
