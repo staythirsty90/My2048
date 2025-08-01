@@ -46,7 +46,7 @@ namespace My2048 {
         /// </summary>
         public void InitializePool() {
 
-            if(IsInitialized()) {
+            if(tilePool != null && tilePool.Count > 0) {
                 // We already have instantiated tiles. No need to continue.
                 return;
             }
@@ -61,15 +61,11 @@ namespace My2048 {
             }
         }
 
-        public bool IsInitialized() {
-            return tilePool != null && tilePool.Count > 0;
-        }
-
         public void Create() {
-            Length = size * size;
-            positions = new Vector2[Length];
-            tiles = new List<Tile>(Length);
-            removedTiles = new List<Tile>(Length); ;
+            Length          = size * size;
+            positions       = new Vector2[Length];
+            tiles           = new List<Tile>(Length);
+            removedTiles    = new List<Tile>(Length);
 
             InitializePool();
 
@@ -79,7 +75,6 @@ namespace My2048 {
                     positions[i] = new Vector2(x, y);
                     tiles.Add(null);
                     removedTiles.Add(null);
-
                 }
             }
         }
@@ -95,22 +90,22 @@ namespace My2048 {
                 return null;
             }
 
-            Tile t = GetTileFromPool();
-            t.index = td.index;
-            t.currentMove.index = td.oldIndex;
-            t.otherTileIndex = td.otherTileIndex;
-            t.currentMove.merged = td.merged;
-            t.value = td.value;
-            t.currentMove.spawnedFromMove = td.spawned;
+            Tile t                          = GetTileFromPool();
+            t.index                         = td.index;
+            t.currentMove.index             = td.oldIndex;
+            t.otherTileIndex                = td.otherTileIndex;
+            t.currentMove.merged            = td.merged;
+            t.value                         = td.value;
+            t.currentMove.spawnedFromMove   = td.spawned;
             return t;
         }
 
         public void Load(in SaveData gd) {
-            size = gd.size;
-            Length = gd.activeTileData.Length;
-            positions = new Vector2[Length];
-            tiles = new List<Tile>(Length);
-            removedTiles = new List<Tile>(Length);
+            size            = gd.size;
+            Length          = gd.activeTileData.Length;
+            positions       = new Vector2[Length];
+            tiles           = new List<Tile>(Length);
+            removedTiles    = new List<Tile>(Length);
 
             InitializePool();
 
