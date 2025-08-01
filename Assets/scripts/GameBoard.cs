@@ -100,9 +100,9 @@ namespace My2048 {
             return t;
         }
 
-        public void Load(in SaveData gd) {
-            size            = gd.size;
-            Length          = gd.activeTileData.Length;
+        public void Load(in GameState gs) {
+            size            = gs.size;
+            Length          = gs.activeTileData.Length;
             positions       = new Vector2[Length];
             tiles           = new List<Tile>(Length);
             removedTiles    = new List<Tile>(Length);
@@ -119,7 +119,7 @@ namespace My2048 {
                     int i = x + y * size;
                     positions[i] = new Vector2(x, y);
 
-                    TileData td = gd.removedTileData[i];
+                    TileData td = gs.removedTileData[i];
                     Tile r = LoadTile(td);
                     if(r) {
                         r.gameObject.SetActive(false);
@@ -134,7 +134,7 @@ namespace My2048 {
             for(int x = 0; x < size; x++) {
                 for(int y = 0; y < size; y++) {
                     int i = x + y * size;
-                    TileData td = gd.activeTileData[i];
+                    TileData td = gs.activeTileData[i];
                     Tile t = LoadTile(td);
                     if(!t) {
                         continue;

@@ -14,7 +14,7 @@ public class TwentyFortyEight : MonoBehaviour {
     public Text scoreText;
     public Text bestText;
     public Button undoButton;
-    public SaveData saveData;
+    public GameState gameState;
     public GameBoard board;
     public bool IsUndoing { get; private set; }
     public bool IsMoving { get; private set; }
@@ -33,8 +33,8 @@ public class TwentyFortyEight : MonoBehaviour {
     void Start() {
         MoveData.Init(board.size);
 
-        if(SaveLoad.TryLoad(out saveData)) {
-            board.Load(saveData);
+        if(SaveLoad.TryLoad(out gameState)) {
+            board.Load(gameState);
         }
         else {
             // Couldn't load the save file.
@@ -44,8 +44,8 @@ public class TwentyFortyEight : MonoBehaviour {
         tileStack               = new Stack<Tile>(board.size);
         bestScore               = (uint)PlayerPrefs.GetInt("best");
         bestText.text           = bestScore.ToString();
-        scoreText.text          = saveData.score.ToString();
-        undoButton.interactable = saveData.canUndo;
+        scoreText.text          = gameState.score.ToString();
+        undoButton.interactable = gameState.canUndo;
     }
 
     void Update() {
@@ -137,16 +137,16 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void Undo() {
         if(IsUndoing) return;
-        if(!saveData.canUndo) return;
+        if(!gameState.canUndo) return;
         IsUndoing = true;
-        saveData.canUndo = false;
+        gameState.canUndo = false;
         var move = new MoveData();
-        switch(saveData.previousSwipe.direction) {
+        switch(gameState.previousSwipe.direction) {
             case Direction.TOP_TO_BOTTOM:
-                move = saveData.previousSwipe.invert ? MoveData.Up : MoveData.Down;
+                move = gameState.previousSwipe.invert ? MoveData.Up : MoveData.Down;
                 break;
             case Direction.LEFT_TO_RIGHT:
-                move = saveData.previousSwipe.invert ? MoveData.Right : MoveData.Left;
+                move = gameState.previousSwipe.invert ? MoveData.Right : MoveData.Left;
                 break;
         }
         for(int i = 0; i < board.size; i++) {
@@ -195,27 +195,27 @@ public class TwentyFortyEight : MonoBehaviour {
     void OnTilesFinishedLerp() {
         if(IsUndoing) {
             IsUndoing           = false;
-            saveData.score      = saveData.previousScore;
-            scoreText.text      = saveData.score.ToString();
+            gameState.score     = gameState.previousScore;
+            scoreText.text      = gameState.score.ToString();
         }
         else {
             board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
-            saveData.score      += deltaScore;
+            gameState.score     += deltaScore;
             deltaScore          = 0;
 
-            if(saveData.score > bestScore) {
-                bestScore       = saveData.score;
+            if(gameState.score > bestScore) {
+                bestScore       = gameState.score;
                 bestText.text   = bestScore.ToString();
             }
 
-            scoreText.text      = saveData.score.ToString();
+            scoreText.text      = gameState.score.ToString();
             
             PlayerPrefs.SetInt("best", (int)bestScore);
             CheckForWinOrLose();
         }
 
         IsMoving                = false;
-        undoButton.interactable = saveData.canUndo;
+        undoButton.interactable = gameState.canUndo;
         phase                   = GamePhase.GETTING_INPUT;
         
         SaveLoad.Save(game: this);
@@ -250,10 +250,10 @@ public class TwentyFortyEight : MonoBehaviour {
             return;
         }
         
-        saveData.previousSwipe  = move.swipe;
-        saveData.previousScore  = saveData.score;
+        gameState.previousSwipe  = move.swipe;
+        gameState.previousScore  = gameState.score;
         IsMoving                = true;
-        saveData.canUndo        = true;
+        gameState.canUndo        = true;
 
         board.ClearRemovedTiles();
 
@@ -348,13 +348,13 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     public void NewGamePressed() {
-        saveData.score              = 0;
-        saveData.previousScore      = 0;
-        saveData.canUndo            = false;
+        gameState.score              = 0;
+        gameState.previousScore      = 0;
+        gameState.canUndo            = false;
         IsMoving                    = false;
         IsUndoing                   = false;
-        saveData.activeTileData     = new TileData[board.Length];
-        saveData.removedTileData    = new TileData[board.Length];
+        gameState.activeTileData     = new TileData[board.Length];
+        gameState.removedTileData    = new TileData[board.Length];
 
         for(int i = 0; i < board.Length; i++) {
             DeactivateTile(i, board.tiles[i]);

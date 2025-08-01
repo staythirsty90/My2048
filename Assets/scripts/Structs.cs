@@ -126,7 +126,7 @@ namespace My2048 {
     }
 
     [Serializable]
-    public struct SaveData {
+    public struct GameState {
         public bool canUndo;
         public SwipeData previousSwipe;
         public TileData[] activeTileData;
