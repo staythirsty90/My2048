@@ -45,18 +45,23 @@ public class TwentyFortyEight : MonoBehaviour {
         switch(phase) {
             case GamePhase.GETTING_INPUT:
 
+                var didMove = false;
                 var moveDir = MyInput.GetInputDirection(game: this);
 
                 if(moveDir == Vector2.up && MoveTiles(MoveData.Up)) {
-                    BeginLerpPhase();
+                    didMove = true;
                 }
                 else if(moveDir == Vector2.down && MoveTiles(MoveData.Down)) {
-                    BeginLerpPhase();
+                    didMove = true;
                 }
                 else if(moveDir == Vector2.right && MoveTiles(MoveData.Right)) {
-                    BeginLerpPhase();
+                    didMove = true;
                 }
                 else if(moveDir == Vector2.left && MoveTiles(MoveData.Left)) {
+                    didMove = true;
+                }
+
+                if(didMove) {
                     BeginLerpPhase();
                 }
 
