@@ -140,7 +140,7 @@ namespace My2048 {
                         spawnedTile = t;
                     }
                     if(t.currentMove.merged) {
-                        Tile r = removedTiles[GetOtherIFromIndex(t)];
+                        Tile r = removedTiles[GetOther_i(t)];
                         if(!r) {
                             continue;
                         }
@@ -156,7 +156,7 @@ namespace My2048 {
             }
         }
 
-        public int GetOtherIFromIndex(in Tile t) {
+        public int GetOther_i(in Tile t) {
             return t.otherTileIndex.x + t.otherTileIndex.y * size;
         }
 

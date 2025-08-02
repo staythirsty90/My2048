@@ -7,7 +7,7 @@ namespace My2048 {
     
     public static class MyInput {
 
-        public static Vector2 HandleInput(in TwentyFortyEight game) {
+        public static Vector2 GetInputDirection(in TwentyFortyEight game) {
             if(game.IsMoving || game.IsUndoing) {
                 return default;
             }

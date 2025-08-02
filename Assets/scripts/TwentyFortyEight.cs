@@ -45,22 +45,18 @@ public class TwentyFortyEight : MonoBehaviour {
         switch(phase) {
             case GamePhase.GETTING_INPUT:
 
-                var moveDir = MyInput.HandleInput(game: this);
+                var moveDir = MyInput.GetInputDirection(game: this);
 
-                if(moveDir == Vector2.up) {
-                    MoveTiles(MoveData.Up);
+                if(moveDir == Vector2.up && MoveTiles(MoveData.Up)) {
+                    BeginLerpPhase();
                 }
-                else if(moveDir == Vector2.down) {
-                    MoveTiles(MoveData.Down);
+                else if(moveDir == Vector2.down && MoveTiles(MoveData.Down)) {
+                    BeginLerpPhase();
                 }
-                else if(moveDir == Vector2.right) {
-                    MoveTiles(MoveData.Right);
+                else if(moveDir == Vector2.right && MoveTiles(MoveData.Right)) {
+                    BeginLerpPhase();
                 }
-                else if(moveDir == Vector2.left) {
-                    MoveTiles(MoveData.Left);
-                }
-
-                if(moveDir != Vector2.zero) {
+                else if(moveDir == Vector2.left && MoveTiles(MoveData.Left)) {
                     BeginLerpPhase();
                 }
 
@@ -162,10 +158,10 @@ public class TwentyFortyEight : MonoBehaviour {
                     continue;
                 }
 
-                Tile r                                  = board.removedTiles[board.GetOtherIFromIndex(t)];
+                Tile r                                  = board.removedTiles[board.GetOther_i(t)];
                 board[r.currentMove.index]              = r;
                 r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
-                board.removedTiles[board.Get_i(r)] = null;
+                board.removedTiles[board.Get_i(r)]      = null;
                 r.Undo();
                 t.SetSprite();
                 t.ResetFlagsAndIndex();
@@ -241,18 +237,23 @@ public class TwentyFortyEight : MonoBehaviour {
         Debug.Log("GameOver!");
     }
 
-    public void MoveTiles(in MoveData move) {
+    /// <summary>
+    /// Attempt to move the Tiles in the given MoveData direction. If the Tiles cannot move, this method returns false, otherwise it returns true.
+    /// </summary>
+    /// <param name="move">The direction for the tiles to move to.</param>
+    /// <returns>Whether or not the tiles were moved.</returns>
+    public bool MoveTiles(in MoveData move) {
         if(IsMoving) {
-            return;
+            return false;
         }
         
         if(!CanMove(move.swipe)) {
-            return;
+            return false;
         }
-        
+
         gameState.previousSwipe  = move.swipe;
         gameState.previousScore  = gameState.score;
-        IsMoving                = true;
+        IsMoving                 = true;
         gameState.canUndo        = true;
 
         board.ClearRemovedTiles();
@@ -302,6 +303,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile.DebugSetGameObjectName(tile);
             }
         }
+        return true;
     }
 
     static bool CanMerge(in Tile prevTile, in Tile tile) {
