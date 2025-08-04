@@ -1,7 +1,9 @@
 ﻿using My2048;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class TwentyFortyEight : MonoBehaviour {
     public int      TouchDeadZone           = 60;
@@ -87,13 +89,18 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void BeginLerpPhase() {
-        foreach(var t in board.tiles) {
+
+        foreach(var t in board.TilePool) {
             Tile.InitLerp(t, tileLerpDuration);
         }
 
-        foreach(var t in board.removedTiles) {
-            Tile.InitLerp(t, tileLerpDuration);
-        }
+        //foreach(var t in board.tiles) {
+        //    Tile.InitLerp(t, tileLerpDuration);
+        //}
+
+        //foreach(var t in board.removedTiles) {
+        //    Tile.InitLerp(t, tileLerpDuration);
+        //}
 
         phase = GamePhase.LERPING_TILES;
     }
@@ -101,13 +108,17 @@ public class TwentyFortyEight : MonoBehaviour {
     void LerpTiles() {
         var isLerping = false;
         
-        foreach(var t in board.tiles) {
+        foreach(var t in board.TilePool) {
             CheckLerp(ref isLerping, t);
         }
+
+        //foreach(var t in board.tiles) {
+        //    CheckLerp(ref isLerping, t);
+        //}
         
-        foreach(var rt in board.removedTiles) {
-            CheckLerp(ref isLerping, rt);
-        }
+        //foreach(var rt in board.removedTiles) {
+        //    CheckLerp(ref isLerping, rt);
+        //}
 
         if(!isLerping) {
             OnTilesFinishedLerp();
@@ -115,14 +126,14 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     void CheckLerp(ref bool lerping, in Tile t) {
-        if(t && t.lerpData.t < 1) {
+        if(t && t.gameObject.activeInHierarchy && t.lerpData.t < 1) {
             t.Lerp();
             lerping = true;
         }
     }
     
     public void OnSpawnedTileShrunk() {
-        board[board.spawnedTile.index] = null;
+        board[board.spawnedTile.CurrentMove.index] = null;
         board.AddTileToPool(board.spawnedTile);
         board.spawnedTile = null;
         Undo();
@@ -157,21 +168,21 @@ public class TwentyFortyEight : MonoBehaviour {
                 
                 RestoreTile(t);
 
-                if(!t.currentMove.merged) {
+                if(!t.CurrentMove.merged) {
                     x += move.xDir;
                     y += move.yDir;
                     continue;
                 }
 
-                Tile r                                  = board.removedTiles[board.GetOther_i(t)];
-                board[r.currentMove.index]              = r;
-                r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
-                board.removedTiles[board.Get_i(r)]      = null;
-                r.Undo();
-                t.SetSprite();
-                t.ResetFlagsAndIndex();
-                r.ResetFlagsAndIndex();
-                r.index                                 = r.currentMove.index;
+                //Tile r                                  = board.removedTiles[board.GetOther_i(t)];
+                //board[r.currentMove.index]              = r;
+                //r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
+                //board.removedTiles[board.Get_i(r)]      = null;
+                //r.Undo();
+                //t.SetSprite();
+                //t.ResetFlagsAndIndex();
+                //r.ResetFlagsAndIndex();
+                //r.index                                 = r.currentMove.index;
             }
         }
      
@@ -180,18 +191,13 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void RestoreTile(Tile t) {
         t.Undo();
-        t.index                     = t.currentMove.index;
-        board[t.currentMove.index]  = t;
-        t.lerpData.end              = board.GetWorldPos(t.currentMove.index);
+        board[t.CurrentMove.index]  = t;
+        t.lerpData.end              = board.GetWorldPos(t.CurrentMove.index);
     }
 
     void OnTilesFinishedLerp() {
-        foreach(var t in board.tiles) {
-            Tile.ActiveTileEndLerp(t);
-        }
-
-        foreach(var t in board.removedTiles) {
-            Tile.RemovedTileEndLerp(t);
+        foreach(var t in board.TilePool) {
+            Tile.TileEndLerp(t);
         }
 
         if(IsUndoing) {
@@ -247,13 +253,32 @@ public class TwentyFortyEight : MonoBehaviour {
     /// </summary>
     /// <param name="move">The direction for the tiles to move to.</param>
     /// <returns>Whether or not the tiles were moved.</returns>
-    public bool MoveTiles(in MoveData move) {
+    bool MoveTiles(in MoveData move) {
         if(IsMoving) {
             return false;
         }
         
         if(!CanMove(move.swipe)) {
             return false;
+        }
+
+        // push all tile states?
+        foreach(var tile in board.TilePool) {
+            if(!tile) {
+                continue;
+            }
+
+            if(tile.moves.Count == 0) {
+                continue;
+            }
+
+            tile.moves.Add(new TileData {
+                index           = tile.CurrentMove.index,
+                merged          = false,
+                removed         = false,
+                value           = tile.CurrentMove.value,
+                spawnedFromMove = false,
+            });
         }
 
         gameState.previousSwipe  = move.swipe;
@@ -284,26 +309,53 @@ public class TwentyFortyEight : MonoBehaviour {
             int tileCount = tileStack.Count;
 
             for(int j = 0; j < tileCount; j++) {
-                Tile tile = tileStack.Pop();
+                
+                Tile tile       = tileStack.Pop();
 
                 if(CanMerge(prevTile, tile)) {
-                    prevTile.MergeWith(tile);
-                    deltaScore                            += prevTile.value;
-                    tile.currentMove.index                = tile.index;
-                    board.removedTiles[board.Get_i(tile)] = tile;
-                    tile.lerpData.end                     = prevTile.lerpData.end;
+
+                    // Merge prevTile and flag Tile to be Removed.
+                    prevTile.value += prevTile.value;
+
+                    prevTile.CurrentMove = new TileData {
+                        index           = prevTile.CurrentMove.index,
+                        merged          = true,
+                        removed         = false,
+                        spawnedFromMove = false,
+                        value           = prevTile.value,
+                    };
+
+                    tile.CurrentMove = new TileData {
+                        index           = tile.CurrentMove.index,
+                        merged          = false,
+                        removed         = true,
+                        spawnedFromMove = false,
+                        value           = tile.value,
+                    };
+
+                    Tile.DebugSetGameObjectName(tile);
+
+                    deltaScore                              += prevTile.value;
+                    //board.removedTiles[board.Get_i(tile)]   = tile;
+                    tile.lerpData.end                       = prevTile.lerpData.end;
 
                     Tile.DebugSetGameObjectName(prevTile);
                     continue;
                 }
 
-                tile.currentMove.index  = tile.index;
-                tile.index              = new Index(x, y);
-                board[tile.index]       = tile;
-                tile.lerpData.end       = board.GetWorldPos(x, y);
-                prevTile                = tile;
-                x                       -= move.xDir;
-                y                       -= move.yDir;
+                tile.CurrentMove = new TileData {
+                    index           = new Index(x, y),
+                    merged          = tile.CurrentMove.merged,
+                    removed         = tile.CurrentMove.removed,
+                    spawnedFromMove = tile.CurrentMove.spawnedFromMove,
+                    value           = tile.value,
+                };
+
+                board[tile.CurrentMove.index]   = tile;
+                tile.lerpData.end               = board.GetWorldPos(x, y);
+                prevTile                        = tile;
+                x                               -= move.xDir;
+                y                               -= move.yDir;
 
                 Tile.DebugSetGameObjectName(tile);
             }
@@ -312,7 +364,7 @@ public class TwentyFortyEight : MonoBehaviour {
     }
 
     static bool CanMerge(in Tile prevTile, in Tile tile) {
-        return prevTile && prevTile.value == tile.value && !prevTile.currentMove.merged && !prevTile.currentMove.removed && !tile.currentMove.removed && !tile.currentMove.merged;
+        return prevTile && prevTile.value == tile.value && !prevTile.CurrentMove.merged && !prevTile.CurrentMove.removed && !tile.CurrentMove.removed && !tile.CurrentMove.merged;
     }
 
     bool CanMove(in SwipeData swipeData) {
@@ -338,7 +390,7 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        if(tile.currentMove.removed) {
+        if(tile.CurrentMove.removed) {
             return false;
         }
 
@@ -377,6 +429,6 @@ public class TwentyFortyEight : MonoBehaviour {
     public void UndoPressed() {
         if(IsUndoing) return;
         if(board.spawnedTile)
-            board.spawnedTile.Shrink();
+            board.spawnedTile.AnimateShrink();
     }
 }

@@ -8,6 +8,8 @@ namespace My2048 {
         static readonly BinaryFormatter bf = new BinaryFormatter();
 
         public static bool TryLoad(out GameState gameState) {
+            gameState = default;
+            return false;
 
             if (File.Exists(SavePath)) {
                 var file = File.Open(SavePath, FileMode.Open);

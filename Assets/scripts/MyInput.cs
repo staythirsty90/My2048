@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -24,7 +25,7 @@ namespace My2048 {
             }
             else if(Input.GetMouseButtonUp(0)) {
                 swipeDelta = (Vector2)Input.mousePosition - startTouch;
-                TrySwipe(startTouch, swipeDelta, game);
+                return TrySwipe(startTouch, swipeDelta, game);
             }
 
             if(Input.touchCount != 0) {
@@ -40,8 +41,7 @@ namespace My2048 {
                     if(startTouch != Vector2.zero) {
                         swipeDelta = touch.position - startTouch;
                     }
-                    TrySwipe(startTouch, swipeDelta, game);
-                    startTouch = swipeDelta = Vector2.zero;
+                    return TrySwipe(startTouch, swipeDelta, game);
                 }
             }
             #endregion
@@ -72,42 +72,34 @@ namespace My2048 {
             }
 
             if(Input.GetKeyUp(KeyCode.Z) && game.board.spawnedTile) {
-                game.board.spawnedTile.Shrink();
+                game.board.spawnedTile.AnimateShrink();
             }
 
             return default;
 #endif
         }
 
-        public static void TrySwipe(Vector2 startTouch, Vector2 swipeDelta, in TwentyFortyEight game) {
+        public static Vector2 TrySwipe(Vector2 startTouch, Vector2 swipeDelta, in TwentyFortyEight game) {
             if(startTouch == Vector2.zero) {
-                return;
+                return Vector2.zero;
             }
 
             if(swipeDelta.magnitude > game.TouchDeadZone && (startTouch.y / Screen.height) < game.TouchMaxHeightPercent) {
                 if(IsTouchOverUIButton()) {
-                    return;
+                    return Vector2.zero;
                 }
-                float x = swipeDelta.x;
-                float y = swipeDelta.y;
+                var x = swipeDelta.x;
+                var y = swipeDelta.y;
                 if(Mathf.Abs(x) > Mathf.Abs(y)) {
                     // left or right
-                    if(x < 0) {
-                        game.MoveTiles(MoveData.Left);
-                    }
-                    else {
-                        game.MoveTiles(MoveData.Right);
-                    }
+                    return x < 0 ? Vector2.left : Vector2.right;
                 }
                 else if(y > 0) {
                     // up or down
-                    game.MoveTiles(MoveData.Up);
+                    return y > 0 ? Vector2.up : Vector2.down;
                 }
-                else {
-                    game.MoveTiles(MoveData.Down);
-                }
-                startTouch = swipeDelta = Vector2.zero;
             }
+            return Vector2.zero;
         }
 
         static List<RaycastResult> results = new List<RaycastResult>(2);

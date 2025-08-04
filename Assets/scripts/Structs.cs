@@ -13,6 +13,12 @@ namespace My2048 {
     }
 
     [Serializable]
+    public struct SwipeData {
+        public Direction direction;
+        public bool invert;
+    }
+
+    [Serializable]
     public struct MoveData {
         public int xDir;
         public int yDir;
@@ -163,35 +169,19 @@ namespace My2048 {
     }
 
     [Serializable]
-    public struct MoveMemory {
+    public struct TileData {
+        public uint value;
         public bool merged;
         public bool removed;
         public bool spawnedFromMove;
         public Index index;
-    }
 
-    [Serializable]
-    public struct SwipeData {
-        public Direction direction;
-        public bool invert;
-    }
-
-    [Serializable]
-    public struct TileData {
-        public uint value;
-        public Index index;
-        public Index oldIndex;
-        public Index otherTileIndex;
-        public bool merged;
-        public bool spawned;
-
-        public TileData(uint Value, Index index, Index oldIndex, Index otherIndex, bool Merged, bool Spawned) {
+        public TileData(uint Value, Index index, bool Merged, bool Spawned, bool Removed) {
             value = Value;
             this.index = index;
-            this.oldIndex = oldIndex;
-            otherTileIndex = otherIndex;
             merged = Merged;
-            spawned = Spawned;
+            spawnedFromMove = Spawned;
+            removed = Removed;
         }
 
         public static void FillTileData(ref TileData[] tileDatas, in List<Tile> tiles) {
@@ -210,7 +200,7 @@ namespace My2048 {
 
         public static TileData MakeTileData(in Tile t) {
             if(t) {
-                return new TileData(t.value, t.index, t.currentMove.index, t.otherTileIndex, t.currentMove.merged, t.currentMove.spawnedFromMove);
+                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
             }
             return Empty;
         }
@@ -218,11 +208,11 @@ namespace My2048 {
         public static TileData MakeTileDataRemoved(in Tile rt) {
             // TODO: Do we need to make sure that the Tile is actually 'removed'?
             if(rt) {
-                return new TileData(rt.value, rt.index, rt.currentMove.index, rt.otherTileIndex, false, false);
+                return new TileData(rt.value, rt.CurrentMove.index, false, false, true);
             }
             return Empty;
         }
 
-        public static TileData Empty => new TileData(0, Index.Invalid, Index.Invalid, Index.Invalid, false, false);
+        public static TileData Empty => new TileData(0, Index.Invalid, false, false, false);
     }
 }

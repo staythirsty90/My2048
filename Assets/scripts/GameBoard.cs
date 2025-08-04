@@ -12,7 +12,7 @@ namespace My2048 {
         public int Length { get; private set; }
         public Tile spawnedTile;
 
-        List<Tile> tilePool;
+        public List<Tile> TilePool { get; private set; }
 
         public Tile this[int x, int y] {
             get => GetTileFromIndex(x, y);
@@ -45,17 +45,17 @@ namespace My2048 {
         /// </summary>
         public void InitializePool() {
 
-            if(tilePool != null && tilePool.Count > 0) {
+            if(TilePool != null && TilePool.Count > 0) {
                 // We already have instantiated tiles. No need to continue.
                 return;
             }
 
-            tilePool = new List<Tile>(Length);
+            TilePool = new List<Tile>(Length);
             for(int x = 0; x < size; x++) {
                 for(int y = 0; y < size; y++) {
                     Tile t = Object.Instantiate(tilePrefab);
                     t.gameObject.SetActive(false);
-                    tilePool.Add(t);
+                    TilePool.Add(t);
                 }
             }
         }
@@ -90,12 +90,13 @@ namespace My2048 {
                 throw new System.NullReferenceException("Couldn't file a Tile GameObject from the Tile Pool.");
             }
 
-            t.index                         = td.index;
-            t.currentMove.index             = td.oldIndex;
-            t.otherTileIndex                = td.otherTileIndex;
-            t.currentMove.merged            = td.merged;
-            t.value                         = td.value;
-            t.currentMove.spawnedFromMove   = td.spawned;
+            t.CurrentMove = new TileData {
+                index = td.index,
+                merged = td.merged,
+                value = td.value,
+                spawnedFromMove = td.spawnedFromMove,
+            };
+
             return t;
         }
 
@@ -118,13 +119,16 @@ namespace My2048 {
 
                     TileData td = gs.removedTileData[i];
                     Tile r      = LoadTile(td);
-                    if(r) {
-                        r.gameObject.SetActive(false);
-                        r.SetSprite();
-                        r.currentMove.removed = true;
-                        r.lerpData.end = GetWorldPos(r.currentMove.index.x, r.currentMove.index.y);
-                        removedTiles[i] = r;
-                    }
+                    if(!r) continue;
+                    
+                    r.gameObject.SetActive(false);
+                    r.SetSprite();
+
+                    var currentMove         = r.CurrentMove;
+                    currentMove.removed     = true;
+                    r.CurrentMove           = currentMove;
+                    r.lerpData.end          = GetWorldPos(r.CurrentMove.index.x, r.CurrentMove.index.y);
+                    removedTiles[i]         = r;
                 }
             }
 
@@ -136,29 +140,19 @@ namespace My2048 {
                     if(!t) {
                         continue;
                     }
-                    if(t.currentMove.spawnedFromMove) {
+                    if(t.CurrentMove.spawnedFromMove) {
                         spawnedTile = t;
                     }
-                    if(t.currentMove.merged) {
-                        Tile r = removedTiles[GetOther_i(t)];
-                        if(!r) {
-                            continue;
-                        }
-                        t.otherTileIndex = r.index;
-                        r.otherTileIndex = t.index;
-                        r.transform.position = GetWorldPos(r.otherTileIndex);
-                    }
+                    
                     t.SetSprite();
-                    t.transform.position = GetWorldPos(t.index);
-                    t.lerpData.end       = GetWorldPos(t.index);
+                    t.transform.position = GetWorldPos(t.CurrentMove.index);
+                    t.lerpData.end       = GetWorldPos(t.CurrentMove.index);
                     this[x, y] = t;
                 }
             }
         }
 
-        public int GetOther_i(in Tile t) {
-            return t.otherTileIndex.x + t.otherTileIndex.y * size;
-        }
+        
 
         /// <summary>
         /// Return the i index from the Tile's Index.x and Index.y
@@ -166,7 +160,7 @@ namespace My2048 {
         /// <param name="t">The tile.</param>
         /// <returns></returns>
         public int Get_i(in Tile t) {
-            return t.currentMove.index.x + t.currentMove.index.y * size;
+            return t.CurrentMove.index.x + t.CurrentMove.index.y * size;
         }
 
         public Tile SpawnTile(int index, uint value, bool spawnedFromMove) {
@@ -175,15 +169,21 @@ namespace My2048 {
                 Debug.LogWarning("There are no more tiles in the pool! Instantiating one.");
                 t = Object.Instantiate(tilePrefab);
             }
+
             tiles[index] = t;
             t.value = value;
-            t.index = new Index(index % size, index / size);
-            t.currentMove.index = t.index;
-            t.transform.position = GetWorldPos(t.index);
+            var currentMove = new TileData {
+                index = new Index(index % size, index / size),
+                value = value,
+            };
+            t.transform.position = GetWorldPos(currentMove.index);
             if(spawnedFromMove) {
-                t.Spawn();
-                t.currentMove.spawnedFromMove = true;
+                t.AnimateSpawn();
+                currentMove.spawnedFromMove = true;
             }
+
+            t.CurrentMove = currentMove;
+
             t.SetSprite();
             return t;
         }
@@ -212,8 +212,8 @@ namespace My2048 {
         }
 
         public Tile GetNextTile(Tile t, SwipeData swipeData) {
-            int x = t.index.x;
-            int y = t.index.y;
+            int x = t.CurrentMove.index.x;
+            int y = t.CurrentMove.index.y;
             Tile next = null;
             int count = 0;
             int xDir = 0;
@@ -239,8 +239,8 @@ namespace My2048 {
         }
 
         public Index GetNextEmptyIndex(Tile t, SwipeData swipeData) {
-            var x = t.index.x;
-            var y = t.index.y;
+            var x = t.CurrentMove.index.x;
+            var y = t.CurrentMove.index.y;
             var next = Index.Invalid;
             var count = 0;
             var xDir = 0;
@@ -272,11 +272,11 @@ namespace My2048 {
         }
 
         Tile GetTileFromPool() {
-            for(int i = 0; i < tilePool.Count; i++) {
-                Tile t = tilePool[i];
-                if(t) {
+            for(int i = 0; i < TilePool.Count; i++) {
+                Tile t = TilePool[i];
+                if(t && !t.gameObject.activeInHierarchy) { // TODO: better checking for a tile ready to be used.
                     t.OnRemovedFromPool();
-                    tilePool[i] = null;
+                    //TilePool[i] = null;
                     return t;
                 }
             }
@@ -284,8 +284,8 @@ namespace My2048 {
         }
 
         public void AddTileToPool(Tile t) {
-            if(!tilePool.Contains(t)) {
-                tilePool.Add(t);
+            if(!TilePool.Contains(t)) {
+                TilePool.Add(t);
             }
             t.Deactivate();
         }
@@ -296,8 +296,8 @@ namespace My2048 {
                 if(!r) {
                     continue;
                 }
-                if(!tilePool.Contains(r)) {
-                    tilePool.Add(r);
+                if(!TilePool.Contains(r)) {
+                    TilePool.Add(r);
                 }
                 removedTiles[i] = null;
             }

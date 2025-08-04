@@ -1,17 +1,31 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace My2048 {
     [RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
-        public MoveMemory currentMove;
-        public Index index;
-        public Index otherTileIndex;
+        public TileData CurrentMove { 
+            get { return moves[Mathf.Max(0, moves.Count-1)]; } // return 0 or higher.
+            set { 
+                if(moves.Count == 0) {
+                    moves.Add(value);
+                }
+                else {
+                    moves[Mathf.Max(0, moves.Count-1)] = value; 
+                }
+            
+            }
+        }
+        
         public uint value;
-        public Animator animator;
         public LerpData<Vector2> lerpData;
 
+        public List<TileData> moves = new List<TileData>();
+
+        Animator animator;
         Transform tf;
         SpriteRenderer sr;
+        
         static TwentyFortyEight game;
 
         void Awake() {
@@ -19,15 +33,7 @@ namespace My2048 {
             sr = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
             if(!game) game = FindObjectOfType<TwentyFortyEight>();
-            Spawn();
-        }
-
-        public void MergeWith(Tile other) {
-            Merge();
-            otherTileIndex = other.index;
-            other.otherTileIndex = index;
-            other.Remove();
-            DebugSetGameObjectName(this);
+            AnimateSpawn();
         }
 
         public void Lerp() {
@@ -36,30 +42,33 @@ namespace My2048 {
             tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
         }
 
-        public static void ActiveTileEndLerp(Tile t) {
+        public static void TileEndLerp(Tile t) {
             if(!t) {
+                return;
+            }
+
+            if(t.moves.Count == 0) { // TODO: make this more Robust?
+                return;
+            }
+
+            if(!t.gameObject.activeInHierarchy) {
                 return;
             }
 
             t.transform.position = t.lerpData.end;
             t.SetSprite();
             
-            if(t.currentMove.merged) {
+            if(t.CurrentMove.merged) {
                 t.animator.SetTrigger("merge");
             }
-        }
-
-        public static void RemovedTileEndLerp(Tile t) {
-            if(!t) {
-                return;
+            else if(t.CurrentMove.removed) {
+                t.gameObject.SetActive(false);
             }
-            t.transform.position = t.lerpData.end;
-            t.gameObject.SetActive(false);
-            t.SetSprite();
         }
 
         public static void InitLerp(Tile t, in float tileLerpDuration) {
             if(t == null) return;
+            if(!t.gameObject.activeInHierarchy) return; // TODO:
             t.lerpData.timeStarted    = Time.time;
             t.lerpData.start          = t.tf.position;
             t.lerpData.lerpDuration   = tileLerpDuration;
@@ -77,27 +86,19 @@ namespace My2048 {
         }
 
         public void ResetFlagsAndIndex() {
-            currentMove.merged = false;
-            currentMove.removed = false;
-            currentMove.spawnedFromMove = false;
-            otherTileIndex = Index.Invalid;
+            //CurrentMove.merged = false;
+            //CurrentMove.removed = false;
+            //CurrentMove.spawnedFromMove = false;
+
+            //CurrentMove = new TileData();
         }
 
-        public void Shrink() {
+        public void AnimateShrink() {
             animator.SetTrigger("shrink");
         }
 
-        public void Spawn() {
+        public void AnimateSpawn() {
             animator.SetTrigger("spawn");
-        }
-
-        public void Merge() {
-            value += value;
-            currentMove.merged = true;
-        }
-
-        public void Remove() {
-            currentMove.removed = true;
         }
 
         public void Deactivate() {
@@ -109,16 +110,16 @@ namespace My2048 {
         public void OnRemovedFromPool() {
             ResetFlagsAndIndex();
             gameObject.SetActive(true);
-            Spawn();
+            AnimateSpawn();
         }
 
         public void Undo() {
-            if(currentMove.merged) {
+            if(CurrentMove.merged) {
                 // Unmerge
                 value /= 2;
                 DebugSetGameObjectName(this);
             }
-            if(currentMove.removed) {
+            if(CurrentMove.removed) {
                 gameObject.SetActive(true);
             }
         }
