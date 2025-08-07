@@ -6,7 +6,7 @@ namespace My2048 {
     public class Tile : MonoBehaviour {
         public TileData CurrentMove { 
             get { return RingBuffer.Peek(); } // return 0 or higher.
-            set { RingBuffer.Set(value); }
+            set { RingBuffer.Push(value); }
         }
 
         public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>(4);
@@ -52,33 +52,45 @@ namespace My2048 {
             else if(t.CurrentMove.removed) {
                 t.gameObject.SetActive(false);
             }
-
-            //t.RingBuffer.Advance();
         }
 
         public bool FindUndoPoint() {
 
-            var headCopy = (RingBuffer.head - 1) % RingBuffer.capacity;
-            var tries = 1; // Increment tries, since we took a step back in the code above.
-
-            while(RingBuffer.buffer[headCopy].value == 0 && tries < RingBuffer.capacity) {
-                headCopy = (headCopy - 1) % RingBuffer.capacity;
-                tries++;
-            }
-
-            if(tries >= RingBuffer.capacity) {
-                Debug.Log("Couldn't find an Undo point.");
-                // Couldn't find an Undo point.
-                return false;
-            }
-            else {
-                // We found an Undo point.
-                Debug.Log($"FOUND Undo point. tries: {tries}");
+            if(RingBuffer.head > 0) {
                 RingBuffer.buffer[RingBuffer.head] = default; // Wipe current head pointer.
-                RingBuffer.head = headCopy; // Set head to the newly found Undo pointer.
+                RingBuffer.head--;
+                return true;
             }
 
-            return true;
+            return false;
+
+            //var headCopy = (RingBuffer.head - 1) % RingBuffer.capacity;
+            //var tries = 1; // Increment tries, since we took a step back in the code above.
+
+            //if(!gameObject.activeInHierarchy) { // Just go back once if the tile is inactive.
+            //    RingBuffer.head = headCopy;
+            //    return true;
+
+            //}
+
+            //while(RingBuffer.buffer[headCopy].value == 0 && tries < RingBuffer.capacity) {
+            //    headCopy = (headCopy - 1) % RingBuffer.capacity;
+            //    tries++;
+            //}
+
+            //if(tries >= RingBuffer.capacity) {
+            //    Debug.Log("Couldn't find an Undo point.");
+            //    // Couldn't find an Undo point.
+            //    return false;
+            //}
+            //else {
+            //    // We found an Undo point.
+            //    Debug.Log($"FOUND Undo point. tries: {tries}");
+            //    RingBuffer.buffer[RingBuffer.head] = default; // Wipe current head pointer.
+            //    RingBuffer.head = headCopy; // Set head to the newly found Undo pointer.
+            //}
+
+            //return true;
         }
 
         public static void InitLerp(Tile t, in float tileLerpDuration) {

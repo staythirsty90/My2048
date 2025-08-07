@@ -177,13 +177,12 @@ namespace My2048 {
             }
             t.SetSprite();
 
-            var p = t.RingBuffer.Peek();
-            if(p.value != 0 || p.removed) {
-                Debug.LogWarning($"overwriting tile state at head {t.RingBuffer.head} when spawning.");
-            }
+            //var p = t.RingBuffer.Peek();
+            //if(p.value != 0 || p.removed) {
+            //    Debug.LogWarning($"overwriting tile state at head {t.RingBuffer.head} when spawning.");
+            //}
 
-            //t.RingBuffer.Advance();
-            t.RingBuffer.Set(currentMove);
+            t.RingBuffer.Push(currentMove);
             
             return t;
         }

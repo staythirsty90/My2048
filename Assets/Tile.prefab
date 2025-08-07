@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RingBuffer:
-    head: 0
+    head: -1
     buffer:
     - value: 0
       merged: 0

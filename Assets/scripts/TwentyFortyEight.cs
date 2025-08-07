@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.Port;
 
 public class TwentyFortyEight : MonoBehaviour {
     public int      TouchDeadZone           = 60;
@@ -63,13 +62,6 @@ public class TwentyFortyEight : MonoBehaviour {
                 }
 
                 if(didMove) {
-                    //// Hack 
-                    //foreach(var t in board.TilePool) {
-                    //    if(t.CurrentMove.removed) {
-                    //        t.gameObject.SetActive(false);
-                    //    }
-                    //}
-
                     BeginLerpPhase();
                 }
 
@@ -129,77 +121,11 @@ public class TwentyFortyEight : MonoBehaviour {
         Undo();
     }
 
-    //void Undo() {
-    //    if(IsUndoing) {
-    //        return;
-    //    }
-    //    if(!gameState.canUndo) {
-    //        return;
-    //    }
-        
-    //    IsUndoing           = true;
-    //    gameState.canUndo   = false;
-    //    var move            = new MoveData();
-
-    //    switch(gameState.previousSwipe.direction) {
-    //        case Direction.TOP_TO_BOTTOM:
-    //            move = gameState.previousSwipe.invert ? MoveData.Up : MoveData.Down;
-    //            break;
-    //        case Direction.LEFT_TO_RIGHT:
-    //            move = gameState.previousSwipe.invert ? MoveData.Right : MoveData.Left;
-    //            break;
-    //    }
-
-    //    for(int i = 0; i < board.size; i++) {
-    //        int x = move.startX + i * move.xRowShift;
-    //        int y = move.startY + i * move.yRowShift;
-    //        for(int j = 0; j < board.size; j++) {
-    //            Tile t = board[x, y];
-    //            if(!t) {
-    //                x += move.xDir;
-    //                y += move.yDir;
-    //                continue;
-    //            }
-
-    //            board[x, y] = null;
-                
-    //            if(t.CurrentMove.merged) {
-    //                // Unmerge
-    //                t.value /= 2;
-    //                Tile.DebugSetGameObjectName(t);
-    //            }
-    //            if(t.CurrentMove.removed) {
-    //                t.gameObject.SetActive(true);
-    //            }
-
-    //            board[t.CurrentMove.index]  = t;
-    //            t.lerpData.end              = board.GetWorldPos(t.CurrentMove.index);
-
-    //            if(!t.CurrentMove.merged) {
-    //                x += move.xDir;
-    //                y += move.yDir;
-    //                continue;
-    //            }
-
-    //            //Tile r                                  = board.removedTiles[board.GetOther_i(t)];
-    //            //board[r.currentMove.index]              = r;
-    //            //r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
-    //            //board.removedTiles[board.Get_i(r)]      = null;
-    //            //r.Undo();
-    //            //t.SetSprite();
-    //            //t.ResetFlagsAndIndex();
-    //            //r.ResetFlagsAndIndex();
-    //            //r.index                                 = r.currentMove.index;
-    //        }
-    //    }
-     
-    //    BeginLerpPhase();
-    //}
-
     void Undo() {
         if(IsUndoing) {
             return;
         }
+
         if(!gameState.canUndo) {
             return;
         }
@@ -217,8 +143,8 @@ public class TwentyFortyEight : MonoBehaviour {
 
         foreach(var tile in board.TilePool) {
 
-            // Temp: Ignore deactivated tiles for now.
-            if(!tile.gameObject.activeInHierarchy) {
+            if(tile.RingBuffer.head == -1) {
+                // Skip unplayed?
                 continue;
             }
 
@@ -234,9 +160,17 @@ public class TwentyFortyEight : MonoBehaviour {
             tile.SetSprite();
 
             if(tile.FindUndoPoint()) {
+                tile.value          = tile.CurrentMove.value;
+                tile.SetSprite();
+            
                 // Flip the Lerp Start and End positions.
                 tile.lerpData.end   = new Vector2 (tile.CurrentMove.index.x, tile.CurrentMove.index.y);
                 tile.lerpData.start = tile.transform.position;
+            }
+            
+            // Don't write deactivated tiles back to the board.
+            if(!tile.gameObject.activeInHierarchy) {
+                continue;
             }
             
             board[tile.CurrentMove.index] = tile;
@@ -312,18 +246,11 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        // push all tile states?
+        // NOTE: Seems we have to Push the tile states of Unplayed tiles because of they may be Removed?
         foreach(var tile in board.TilePool) {
-            if(!tile) {
-                continue;
-            }
-
-            // Skip tiles that are deactivated (removed as well?)
             if(!tile.gameObject.activeInHierarchy) {
-                continue;
+                tile.RingBuffer.Push(default);
             }
-
-            tile.RingBuffer.Duplicate();
         }
 
         gameState.previousSwipe  = move.swipe;
@@ -353,13 +280,14 @@ public class TwentyFortyEight : MonoBehaviour {
 
             for(int j = 0; j < tileCount; j++) {
                 
-                Tile tile       = tileStack.Pop();
+                Tile tile = tileStack.Pop();
 
                 if(CanMerge(prevTile, tile)) {
 
                     // Merge prevTile and flag Tile to be Removed.
                     prevTile.value += prevTile.value;
 
+                    // We must use Set here, because we don't want to introduce an additional state step when Merging.
                     prevTile.RingBuffer.Set(new TileData {
                         index           = prevTile.CurrentMove.index,
                         merged          = true,
@@ -368,27 +296,24 @@ public class TwentyFortyEight : MonoBehaviour {
                         value           = prevTile.value,
                     });
 
-                    tile.RingBuffer.Set(new TileData {
-                        index           = tile.CurrentMove.index,
+                    tile.RingBuffer.Push(new TileData {
+                        index           = new Index(x , y),
                         merged          = false,
                         removed         = true,
                         spawnedFromMove = false,
                         value           = tile.value,
                     });
-                    //tile.RingBuffer.Advance();
-                    
 
                     Tile.DebugSetGameObjectName(tile);
 
-                    deltaScore                              += prevTile.value;
-                    //board.removedTiles[board.Get_i(tile)]   = tile;
-                    tile.lerpData.end                       = prevTile.lerpData.end;
+                    deltaScore          += prevTile.value;
+                    tile.lerpData.end   = prevTile.lerpData.end;
 
                     Tile.DebugSetGameObjectName(prevTile);
                     continue;
                 }
 
-                tile.RingBuffer.Set(new TileData {
+                tile.RingBuffer.Push(new TileData {
                     index           = new Index(x, y),
                     merged          = false,
                     removed         = false,

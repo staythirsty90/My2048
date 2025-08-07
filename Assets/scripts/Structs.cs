@@ -7,63 +7,52 @@ namespace My2048 {
     [Serializable]
     public class MyRingBuffer<T> {
 
-        
-        public uint head;
+        public int head = -1;
 
         public T[] buffer;
-        public uint capacity;
+        public int capacity;
 
-        public MyRingBuffer(uint Capacity = 32) {
+        public MyRingBuffer(int Capacity = 4) {
             if(Capacity < 1) {
                 throw new ArgumentException("Capacity must be greater than 0.", nameof(Capacity));
             }
 
             capacity = Capacity;
             buffer   = new T[capacity];
-            head     = 0;
+            head     = -1;
         }
 
         public void Push(T item) {
+
+            head += 1;
+
+            if(head >= capacity) {
+                head = capacity - 1;
+                for(int i = 0; i < head; i++) {
+                    buffer[i] = buffer[i + 1];
+                }
+            }
+
             buffer[head] = item;
-            //Advance();
-        }
-
-        public void Advance() {
-            head = (head + 1) % capacity;
-        }
-
-        public void Duplicate() {
-            var item = buffer[head];
-            head = (head + 1) % capacity;
-            buffer[head] = item;
-        }
-
-        public void Undo() {
-            buffer[head] = default;
-            head = (head - 1) % capacity;
-        }
-
-        public void Retreat() {
-            head = (head - 1) % capacity;
         }
 
         public void Set(T item) {
             buffer[head] = item;
         }
 
+        public void Undo() {
+            buffer[head] = default;
+            head--;
+            if(head < 0) {
+                head = 0;
+            }
+        }
+
         public T Peek() {
             return buffer[head];
             //return buffer[(head -1) % capacity];
         }
-
-        public T Pop() {
-            var item = buffer[head];
-            buffer[head] = default;
-            head = (head - 1) % capacity;
-            return item;
-        }
     }
-
 
     public enum Direction {
         TOP_TO_BOTTOM,
