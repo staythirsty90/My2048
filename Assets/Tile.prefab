@@ -45,23 +45,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3891a13a769bd448ab9877fc2e08abd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  memory: []
-  currentMove:
-    merged: 0
-    removed: 0
-    spawnedFromMove: 0
-    index:
-      x: 0
-      y: 0
-  index:
-    x: 0
-    y: 0
-  otherTileIndex:
-    x: 0
-    y: 0
+  RingBuffer:
+    head: 0
+    buffer:
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+    capacity: 4
   value: 0
-  nextPosition: {x: 0, y: 0}
-  animator: {fileID: 0}
+  lerpData:
+    lerpDuration: 0
+    timeStarted: 0
+    start: {x: 0, y: 0}
+    end: {x: 0, y: 0}
+    t: 0
 --- !u!95 &95239154834038246
 Animator:
   serializedVersion: 3
@@ -95,6 +117,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

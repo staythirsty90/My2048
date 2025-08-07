@@ -56,6 +56,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\editor\SpriteRectTools.cs" />
+     <Compile Include="Assets\editor\TileDataDrawer.cs" />
+     <Compile Include="Assets\editor\TileDataListEditor.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
  </Reference>

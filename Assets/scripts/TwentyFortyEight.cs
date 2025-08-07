@@ -1,9 +1,8 @@
 ﻿using My2048;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-
+using static UnityEditor.Experimental.GraphView.Port;
 
 public class TwentyFortyEight : MonoBehaviour {
     public int      TouchDeadZone           = 60;
@@ -64,6 +63,13 @@ public class TwentyFortyEight : MonoBehaviour {
                 }
 
                 if(didMove) {
+                    //// Hack 
+                    //foreach(var t in board.TilePool) {
+                    //    if(t.CurrentMove.removed) {
+                    //        t.gameObject.SetActive(false);
+                    //    }
+                    //}
+
                     BeginLerpPhase();
                 }
 
@@ -94,14 +100,6 @@ public class TwentyFortyEight : MonoBehaviour {
             Tile.InitLerp(t, tileLerpDuration);
         }
 
-        //foreach(var t in board.tiles) {
-        //    Tile.InitLerp(t, tileLerpDuration);
-        //}
-
-        //foreach(var t in board.removedTiles) {
-        //    Tile.InitLerp(t, tileLerpDuration);
-        //}
-
         phase = GamePhase.LERPING_TILES;
     }
 
@@ -111,14 +109,6 @@ public class TwentyFortyEight : MonoBehaviour {
         foreach(var t in board.TilePool) {
             CheckLerp(ref isLerping, t);
         }
-
-        //foreach(var t in board.tiles) {
-        //    CheckLerp(ref isLerping, t);
-        //}
-        
-        //foreach(var rt in board.removedTiles) {
-        //    CheckLerp(ref isLerping, rt);
-        //}
 
         if(!isLerping) {
             OnTilesFinishedLerp();
@@ -139,60 +129,120 @@ public class TwentyFortyEight : MonoBehaviour {
         Undo();
     }
 
-    void Undo() {
-        if(IsUndoing) return;
-        if(!gameState.canUndo) return;
-        IsUndoing = true;
-        gameState.canUndo = false;
-        var move = new MoveData();
-        switch(gameState.previousSwipe.direction) {
-            case Direction.TOP_TO_BOTTOM:
-                move = gameState.previousSwipe.invert ? MoveData.Up : MoveData.Down;
-                break;
-            case Direction.LEFT_TO_RIGHT:
-                move = gameState.previousSwipe.invert ? MoveData.Right : MoveData.Left;
-                break;
-        }
-        for(int i = 0; i < board.size; i++) {
-            int x = move.startX + i * move.xRowShift;
-            int y = move.startY + i * move.yRowShift;
-            for(int j = 0; j < board.size; j++) {
-                Tile t = board[x, y];
-                if(!t) {
-                    x += move.xDir;
-                    y += move.yDir;
-                    continue;
-                }
+    //void Undo() {
+    //    if(IsUndoing) {
+    //        return;
+    //    }
+    //    if(!gameState.canUndo) {
+    //        return;
+    //    }
+        
+    //    IsUndoing           = true;
+    //    gameState.canUndo   = false;
+    //    var move            = new MoveData();
 
-                board[x, y] = null;
+    //    switch(gameState.previousSwipe.direction) {
+    //        case Direction.TOP_TO_BOTTOM:
+    //            move = gameState.previousSwipe.invert ? MoveData.Up : MoveData.Down;
+    //            break;
+    //        case Direction.LEFT_TO_RIGHT:
+    //            move = gameState.previousSwipe.invert ? MoveData.Right : MoveData.Left;
+    //            break;
+    //    }
+
+    //    for(int i = 0; i < board.size; i++) {
+    //        int x = move.startX + i * move.xRowShift;
+    //        int y = move.startY + i * move.yRowShift;
+    //        for(int j = 0; j < board.size; j++) {
+    //            Tile t = board[x, y];
+    //            if(!t) {
+    //                x += move.xDir;
+    //                y += move.yDir;
+    //                continue;
+    //            }
+
+    //            board[x, y] = null;
                 
-                RestoreTile(t);
+    //            if(t.CurrentMove.merged) {
+    //                // Unmerge
+    //                t.value /= 2;
+    //                Tile.DebugSetGameObjectName(t);
+    //            }
+    //            if(t.CurrentMove.removed) {
+    //                t.gameObject.SetActive(true);
+    //            }
 
-                if(!t.CurrentMove.merged) {
-                    x += move.xDir;
-                    y += move.yDir;
-                    continue;
-                }
+    //            board[t.CurrentMove.index]  = t;
+    //            t.lerpData.end              = board.GetWorldPos(t.CurrentMove.index);
 
-                //Tile r                                  = board.removedTiles[board.GetOther_i(t)];
-                //board[r.currentMove.index]              = r;
-                //r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
-                //board.removedTiles[board.Get_i(r)]      = null;
-                //r.Undo();
-                //t.SetSprite();
-                //t.ResetFlagsAndIndex();
-                //r.ResetFlagsAndIndex();
-                //r.index                                 = r.currentMove.index;
+    //            if(!t.CurrentMove.merged) {
+    //                x += move.xDir;
+    //                y += move.yDir;
+    //                continue;
+    //            }
+
+    //            //Tile r                                  = board.removedTiles[board.GetOther_i(t)];
+    //            //board[r.currentMove.index]              = r;
+    //            //r.lerpData.end                          = board.GetWorldPos(r.currentMove.index);
+    //            //board.removedTiles[board.Get_i(r)]      = null;
+    //            //r.Undo();
+    //            //t.SetSprite();
+    //            //t.ResetFlagsAndIndex();
+    //            //r.ResetFlagsAndIndex();
+    //            //r.index                                 = r.currentMove.index;
+    //        }
+    //    }
+     
+    //    BeginLerpPhase();
+    //}
+
+    void Undo() {
+        if(IsUndoing) {
+            return;
+        }
+        if(!gameState.canUndo) {
+            return;
+        }
+        
+        IsUndoing           = true;
+        //gameState.canUndo   = false;
+
+        // null all tiles currently in play.
+        for(int i = 0; i < board.tiles.Count; i++) {
+            var tile = board.tiles[i];
+            if(tile) {
+                board[tile.CurrentMove.index] = null;
             }
+        }
+
+        foreach(var tile in board.TilePool) {
+
+            // Temp: Ignore deactivated tiles for now.
+            if(!tile.gameObject.activeInHierarchy) {
+                continue;
+            }
+
+            if(tile.CurrentMove.merged) {
+                tile.value /= 2;
+                Tile.DebugSetGameObjectName(tile);
+            }
+
+            if(tile.CurrentMove.removed) {
+                tile.gameObject.SetActive(true);
+            }
+
+            tile.SetSprite();
+
+            if(tile.FindUndoPoint()) {
+                // Flip the Lerp Start and End positions.
+                tile.lerpData.end   = new Vector2 (tile.CurrentMove.index.x, tile.CurrentMove.index.y);
+                tile.lerpData.start = tile.transform.position;
+            }
+            
+            board[tile.CurrentMove.index] = tile;
         }
      
         BeginLerpPhase();
-    }
-
-    void RestoreTile(Tile t) {
-        t.Undo();
-        board[t.CurrentMove.index]  = t;
-        t.lerpData.end              = board.GetWorldPos(t.CurrentMove.index);
     }
 
     void OnTilesFinishedLerp() {
@@ -206,7 +256,7 @@ public class TwentyFortyEight : MonoBehaviour {
             scoreText.text      = gameState.score.ToString();
         }
         else {
-            board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
+            //board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
             gameState.score     += deltaScore;
             deltaScore          = 0;
 
@@ -268,25 +318,18 @@ public class TwentyFortyEight : MonoBehaviour {
                 continue;
             }
 
-            if(tile.moves.Count == 0) {
+            // Skip tiles that are deactivated (removed as well?)
+            if(!tile.gameObject.activeInHierarchy) {
                 continue;
             }
 
-            tile.moves.Add(new TileData {
-                index           = tile.CurrentMove.index,
-                merged          = false,
-                removed         = false,
-                value           = tile.CurrentMove.value,
-                spawnedFromMove = false,
-            });
+            tile.RingBuffer.Duplicate();
         }
 
         gameState.previousSwipe  = move.swipe;
         gameState.previousScore  = gameState.score;
         IsMoving                 = true;
         gameState.canUndo        = true;
-
-        board.ClearRemovedTiles();
 
         for(int i = 0; i < board.size; i++) {
             int x = move.startX + i * move.xRowShift;
@@ -317,21 +360,23 @@ public class TwentyFortyEight : MonoBehaviour {
                     // Merge prevTile and flag Tile to be Removed.
                     prevTile.value += prevTile.value;
 
-                    prevTile.CurrentMove = new TileData {
+                    prevTile.RingBuffer.Set(new TileData {
                         index           = prevTile.CurrentMove.index,
                         merged          = true,
                         removed         = false,
                         spawnedFromMove = false,
                         value           = prevTile.value,
-                    };
+                    });
 
-                    tile.CurrentMove = new TileData {
+                    tile.RingBuffer.Set(new TileData {
                         index           = tile.CurrentMove.index,
                         merged          = false,
                         removed         = true,
                         spawnedFromMove = false,
                         value           = tile.value,
-                    };
+                    });
+                    //tile.RingBuffer.Advance();
+                    
 
                     Tile.DebugSetGameObjectName(tile);
 
@@ -343,13 +388,13 @@ public class TwentyFortyEight : MonoBehaviour {
                     continue;
                 }
 
-                tile.CurrentMove = new TileData {
+                tile.RingBuffer.Set(new TileData {
                     index           = new Index(x, y),
-                    merged          = tile.CurrentMove.merged,
-                    removed         = tile.CurrentMove.removed,
-                    spawnedFromMove = tile.CurrentMove.spawnedFromMove,
+                    merged          = false,
+                    removed         = false,
+                    spawnedFromMove = false,
                     value           = tile.value,
-                };
+                });
 
                 board[tile.CurrentMove.index]   = tile;
                 tile.lerpData.end               = board.GetWorldPos(x, y);
@@ -414,7 +459,6 @@ public class TwentyFortyEight : MonoBehaviour {
 
         for(int i = 0; i < board.Length; i++) {
             DeactivateTile(i, board.tiles[i]);
-            DeactivateTile(i, board.removedTiles[i]);
         }
 
         board.CreateBoardAndStartingTiles();
@@ -428,7 +472,11 @@ public class TwentyFortyEight : MonoBehaviour {
 
     public void UndoPressed() {
         if(IsUndoing) return;
-        if(board.spawnedTile)
+        if(board.spawnedTile) {
             board.spawnedTile.AnimateShrink();
+        }
+        else {
+            Undo();
+        }
     }
 }

@@ -1,7 +1,70 @@
 ﻿using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 namespace My2048 {
+
+    [Serializable]
+    public class MyRingBuffer<T> {
+
+        
+        public uint head;
+
+        public T[] buffer;
+        public uint capacity;
+
+        public MyRingBuffer(uint Capacity = 32) {
+            if(Capacity < 1) {
+                throw new ArgumentException("Capacity must be greater than 0.", nameof(Capacity));
+            }
+
+            capacity = Capacity;
+            buffer   = new T[capacity];
+            head     = 0;
+        }
+
+        public void Push(T item) {
+            buffer[head] = item;
+            //Advance();
+        }
+
+        public void Advance() {
+            head = (head + 1) % capacity;
+        }
+
+        public void Duplicate() {
+            var item = buffer[head];
+            head = (head + 1) % capacity;
+            buffer[head] = item;
+        }
+
+        public void Undo() {
+            buffer[head] = default;
+            head = (head - 1) % capacity;
+        }
+
+        public void Retreat() {
+            head = (head - 1) % capacity;
+        }
+
+        public void Set(T item) {
+            buffer[head] = item;
+        }
+
+        public T Peek() {
+            return buffer[head];
+            //return buffer[(head -1) % capacity];
+        }
+
+        public T Pop() {
+            var item = buffer[head];
+            buffer[head] = default;
+            head = (head - 1) % capacity;
+            return item;
+        }
+    }
+
+
     public enum Direction {
         TOP_TO_BOTTOM,
         LEFT_TO_RIGHT
@@ -191,24 +254,9 @@ namespace My2048 {
             }
         }
 
-        public static void FillTileDataRemoved(ref TileData[] removedTileDatas, in List<Tile> removedTiles) {
-            removedTileDatas = new TileData[removedTiles.Capacity];
-            for(int i = 0; i < removedTileDatas.Length; i++) {
-                removedTileDatas[i] = MakeTileDataRemoved(removedTiles[i]);
-            }
-        }
-
         public static TileData MakeTileData(in Tile t) {
             if(t) {
                 return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
-            }
-            return Empty;
-        }
-
-        public static TileData MakeTileDataRemoved(in Tile rt) {
-            // TODO: Do we need to make sure that the Tile is actually 'removed'?
-            if(rt) {
-                return new TileData(rt.value, rt.CurrentMove.index, false, false, true);
             }
             return Empty;
         }

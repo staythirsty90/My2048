@@ -7,7 +7,6 @@ namespace My2048 {
         public Tile tilePrefab;
         public int seed = 101;
         public List<Tile> tiles;
-        public List<Tile> removedTiles;
         public int size;
         public int Length { get; private set; }
         public Tile spawnedTile;
@@ -63,13 +62,11 @@ namespace My2048 {
         public void Create() {
             Length          = size * size;
             tiles           = new List<Tile>(Length);
-            removedTiles    = new List<Tile>(Length);
 
             InitializePool();
 
             for(int x = 0; x < Length; x++) {
                 tiles.Add(null);
-                removedTiles.Add(null);
             }
         }
 
@@ -91,9 +88,9 @@ namespace My2048 {
             }
 
             t.CurrentMove = new TileData {
-                index = td.index,
-                merged = td.merged,
-                value = td.value,
+                index           = td.index,
+                merged          = td.merged,
+                value           = td.value,
                 spawnedFromMove = td.spawnedFromMove,
             };
 
@@ -104,13 +101,11 @@ namespace My2048 {
             size            = gs.size;
             Length          = gs.activeTileData.Length;
             tiles           = new List<Tile>(Length);
-            removedTiles    = new List<Tile>(Length);
 
             InitializePool();
 
             for(int i = 0; i < Length; i++) {
                 tiles.Add(null);
-                removedTiles.Add(null);
             }
 
             for(int x = 0; x < size; x++) {
@@ -128,7 +123,6 @@ namespace My2048 {
                     currentMove.removed     = true;
                     r.CurrentMove           = currentMove;
                     r.lerpData.end          = GetWorldPos(r.CurrentMove.index.x, r.CurrentMove.index.y);
-                    removedTiles[i]         = r;
                 }
             }
 
@@ -181,10 +175,16 @@ namespace My2048 {
                 t.AnimateSpawn();
                 currentMove.spawnedFromMove = true;
             }
-
-            t.CurrentMove = currentMove;
-
             t.SetSprite();
+
+            var p = t.RingBuffer.Peek();
+            if(p.value != 0 || p.removed) {
+                Debug.LogWarning($"overwriting tile state at head {t.RingBuffer.head} when spawning.");
+            }
+
+            //t.RingBuffer.Advance();
+            t.RingBuffer.Set(currentMove);
+            
             return t;
         }
 
@@ -288,19 +288,6 @@ namespace My2048 {
                 TilePool.Add(t);
             }
             t.Deactivate();
-        }
-
-        public void ClearRemovedTiles() {
-            for(int i = 0; i < removedTiles.Count; i++) {
-                Tile r = removedTiles[i];
-                if(!r) {
-                    continue;
-                }
-                if(!TilePool.Contains(r)) {
-                    TilePool.Add(r);
-                }
-                removedTiles[i] = null;
-            }
         }
     }
 }
