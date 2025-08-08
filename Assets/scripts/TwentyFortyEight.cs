@@ -1,4 +1,5 @@
 ﻿using My2048;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +24,8 @@ public class TwentyFortyEight : MonoBehaviour {
 
     Stack<Tile> tileStack;
     GamePhase phase;
+
+    public TileData[][] test = new TileData[16][];
 
     public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>();
 
@@ -85,12 +88,26 @@ public class TwentyFortyEight : MonoBehaviour {
 
     void PushTileStates() {
         // Push the state before moving the Tiles. Why exactly is this required?
+
+        // Temp clear the buffer for debugging purposes.
+        RingBuffer.buffer.Clear();
+
         for(int i = 0; i < board.tiles.Count; i++) {
             var t = board.tiles[i];
             if(t) {
-                t.CurrentMove.merged    = false;
-                t.CurrentMove.removed   = false;
                 RingBuffer.Push(t.CurrentMove);
+            }
+        }
+        RingBuffer.head = 0;
+    }
+
+    void ResetTileFlags() {
+        for(int i = 0; i < board.tiles.Count; i++) {
+            var t = board.tiles[i];
+            if(t) {
+                t.CurrentMove.removed = false;
+                t.CurrentMove.merged = false;
+                t.CurrentMove.spawnedFromMove = false;
             }
         }
     }
@@ -267,6 +284,7 @@ public class TwentyFortyEight : MonoBehaviour {
         }
 
         PushTileStates();
+        ResetTileFlags();
 
         gameState.previousSwipe  = move.swipe;
         gameState.previousScore  = gameState.score;

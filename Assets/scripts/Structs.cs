@@ -9,7 +9,7 @@ namespace My2048 {
 
         public int head = -1;
 
-        public T[] buffer;
+        public List<T> buffer;
         public int capacity;
 
         public MyRingBuffer(int Capacity = 4) {
@@ -18,45 +18,24 @@ namespace My2048 {
             }
 
             capacity = Capacity;
-            buffer   = new T[capacity];
+            buffer   = new List<T>(capacity);
             head     = -1;
         }
 
         public void Push(T item) {
 
-            head += 1;
+            buffer.Add(item);
 
-            if(head >= capacity) {
-                head = capacity - 1;
-                for(int i = 0; i < head; i++) {
-                    buffer[i] = buffer[i + 1];
-                }
-            }
+            //head += 1;
 
-            buffer[head] = item;
-        }
+            //if(head >= capacity) {
+            //    head = capacity - 1;
+            //    for(int i = 0; i < head; i++) {
+            //        buffer[i] = buffer[i + 1];
+            //    }
+            //}
 
-        public void Set(T item) {
-            buffer[head] = item;
-        }
-
-        public void Undo() {
-            buffer[head] = default;
-            head--;
-            if(head < 0) {
-                head = 0;
-            }
-        }
-
-        public void Reset() {
-            for(int i = 0; i < capacity; i++) {
-                buffer[i] = default;
-            }
-        }
-
-        public T Peek() {
-            return buffer[head];
-            //return buffer[(head -1) % capacity];
+            //buffer[head] = item;
         }
     }
 
