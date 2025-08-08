@@ -28,7 +28,7 @@ namespace My2048 {
         public static void Save(in TwentyFortyEight game) {
 
             var gameData = new GameState() {
-                canUndo         = game.gameState.canUndo,
+                //canUndo         = game.gameState.canUndo,
                 score           = game.gameState.score,
                 size            = game.board.size,
                 previousScore   = game.gameState.previousScore,

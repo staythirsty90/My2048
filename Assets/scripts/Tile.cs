@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace My2048 {
     [RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
         public TileData CurrentMove { 
             get { return RingBuffer.Peek(); } // return 0 or higher.
-            set { RingBuffer.Push(value); }
+            set { RingBuffer.Set(value); }
         }
 
         public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>(4);
@@ -34,7 +33,7 @@ namespace My2048 {
             tf.position = Vector3.Slerp(lerpData.start, lerpData.end, lerpData.t);
         }
 
-        public static void TileEndLerp(Tile t) {
+        public static void TileEndLerp(Tile t, bool undo = false) {
             if(!t) {
                 return;
             }
@@ -43,14 +42,18 @@ namespace My2048 {
                 return;
             }
 
+            t.value = t.CurrentMove.value;
+
             t.transform.position = t.lerpData.end;
             t.SetSprite();
-            
-            if(t.CurrentMove.merged) {
-                t.animator.SetTrigger("merge");
-            }
-            else if(t.CurrentMove.removed) {
-                t.gameObject.SetActive(false);
+
+            if(!undo) {
+                if(t.CurrentMove.merged) {
+                    t.animator.SetTrigger("merge");
+                }
+                else if(t.CurrentMove.removed) {
+                    t.gameObject.SetActive(false);
+                }
             }
         }
 
@@ -59,8 +62,20 @@ namespace My2048 {
             if(RingBuffer.head > 0) {
                 RingBuffer.buffer[RingBuffer.head] = default; // Wipe current head pointer.
                 RingBuffer.head--;
+
+                //// HACK
+                //if(RingBuffer.buffer[RingBuffer.head].spawnedFromMove) {
+                //    return FindUndoPoint();
+                //}
+
                 return true;
             }
+            //else if(RingBuffer.head == 0 && RingBuffer.buffer[RingBuffer.head].spawnedFromMove) { // HACK
+            //    RingBuffer.Set(default);
+            //    gameObject.SetActive(false);
+            //    RingBuffer.head = -1;
+            //    return false;
+            //}
 
             return false;
 
@@ -113,6 +128,7 @@ namespace My2048 {
         }
 
         public void ResetFlagsAndIndex() {
+            RingBuffer = new MyRingBuffer<TileData>(4);
             //CurrentMove.merged = false;
             //CurrentMove.removed = false;
             //CurrentMove.spawnedFromMove = false;
@@ -135,7 +151,7 @@ namespace My2048 {
         }
 
         public void OnRemovedFromPool() {
-            ResetFlagsAndIndex();
+            //ResetFlagsAndIndex();
             gameObject.SetActive(true);
             AnimateSpawn();
         }

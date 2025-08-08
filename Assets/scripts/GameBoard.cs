@@ -60,6 +60,9 @@ namespace My2048 {
         }
 
         public void Create() {
+
+            Random.InitState(seed);
+
             Length          = size * size;
             tiles           = new List<Tile>(Length);
 
@@ -280,13 +283,6 @@ namespace My2048 {
                 }
             }
             return null;
-        }
-
-        public void AddTileToPool(Tile t) {
-            if(!TilePool.Contains(t)) {
-                TilePool.Add(t);
-            }
-            t.Deactivate();
         }
     }
 }

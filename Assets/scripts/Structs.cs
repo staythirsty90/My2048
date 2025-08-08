@@ -48,6 +48,12 @@ namespace My2048 {
             }
         }
 
+        public void Reset() {
+            for(int i = 0; i < capacity; i++) {
+                buffer[i] = default;
+            }
+        }
+
         public T Peek() {
             return buffer[head];
             //return buffer[(head -1) % capacity];
@@ -185,7 +191,6 @@ namespace My2048 {
 
     [Serializable]
     public struct GameState {
-        public bool canUndo;
         public SwipeData previousSwipe;
         public TileData[] activeTileData;
         public TileData[] removedTileData;
@@ -227,13 +232,15 @@ namespace My2048 {
         public bool removed;
         public bool spawnedFromMove;
         public Index index;
+        public Index removedIndex; // Need this to better keep track of Undoing. Don't like having to have two indices......
 
-        public TileData(uint Value, Index index, bool Merged, bool Spawned, bool Removed) {
-            value = Value;
-            this.index = index;
-            merged = Merged;
+        public TileData(uint Value, Index Index, Index RemovedIndex, bool Merged, bool Spawned, bool Removed) {
+            value           = Value;
+            index           = Index;
+            removedIndex    = RemovedIndex;
+            merged          = Merged;
             spawnedFromMove = Spawned;
-            removed = Removed;
+            removed         = Removed;
         }
 
         public static void FillTileData(ref TileData[] tileDatas, in List<Tile> tiles) {
@@ -245,11 +252,11 @@ namespace My2048 {
 
         public static TileData MakeTileData(in Tile t) {
             if(t) {
-                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
+                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.removedIndex, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
             }
             return Empty;
         }
 
-        public static TileData Empty => new TileData(0, Index.Invalid, false, false, false);
+        public static TileData Empty => new TileData(0, Index.Invalid, Index.Invalid, false, false, false);
     }
 }
