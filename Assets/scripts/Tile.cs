@@ -3,12 +3,7 @@
 namespace My2048 {
     [RequireComponent(typeof(Animator), typeof(SpriteRenderer))]
     public class Tile : MonoBehaviour {
-        public TileData CurrentMove { 
-            get { return RingBuffer.Peek(); } // return 0 or higher.
-            set { RingBuffer.Set(value); }
-        }
-
-        public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>();
+        public TileData CurrentMove;
 
         public uint value;
         public LerpData<Vector2> lerpData;
@@ -74,101 +69,50 @@ namespace My2048 {
             }
         }
 
-        public bool Undo() {
-            if(RingBuffer.head == -1) {
-                // Skip unplayed?
-                return false;
-            }
+        //public bool Undo() {
+        //    if(RingBuffer.head == -1) {
+        //        // Skip unplayed?
+        //        return false;
+        //    }
 
-            if(RingBuffer.head == 0) {
-                // Skip tiles that cannot undo.
-                return false;
-            }
+        //    if(RingBuffer.head == 0) {
+        //        // Skip tiles that cannot undo.
+        //        return false;
+        //    }
 
-            if(FindUndoPoint()) {
-                value = CurrentMove.value;
+        //    if(FindUndoPoint()) {
+        //        value = CurrentMove.value;
 
-                if(value == 0) { // Check if the tile should be deactivated / removed.
-                    gameObject.SetActive(false);
-                }
-                else {
-                    gameObject.SetActive(true);
-                }
+        //        if(value == 0) { // Check if the tile should be deactivated / removed.
+        //            gameObject.SetActive(false);
+        //        }
+        //        else {
+        //            gameObject.SetActive(true);
+        //        }
 
-                SetSprite();
+        //        SetSprite();
 
-                if(CurrentMove.removed) {
-                    // Use the RemovedIndex here.
-                    // Flip the Lerp Start and End positions.
-                    lerpData.end   = new Vector2 (CurrentMove.removedIndex.x, CurrentMove.removedIndex.y);
-                    lerpData.start = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
-                    transform.position = lerpData.start; // Instantly move the position to avoid Lerping
-                                                                   // from a possibly newly spawned position.
-                    // HACK
-                    // Force undo again...
-                    //RingBuffer.Undo();
-                }
-                else{
-                    // Flip the Lerp Start and End positions.
-                    lerpData.end   = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
-                    lerpData.start = transform.position;
-                }
+        //        if(CurrentMove.removed) {
+        //            // Use the RemovedIndex here.
+        //            // Flip the Lerp Start and End positions.
+        //            lerpData.end   = new Vector2 (CurrentMove.removedIndex.x, CurrentMove.removedIndex.y);
+        //            lerpData.start = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
+        //            transform.position = lerpData.start; // Instantly move the position to avoid Lerping
+        //                                                           // from a possibly newly spawned position.
+        //            // HACK
+        //            // Force undo again...
+        //            //RingBuffer.Undo();
+        //        }
+        //        else{
+        //            // Flip the Lerp Start and End positions.
+        //            lerpData.end   = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
+        //            lerpData.start = transform.position;
+        //        }
 
-                return true;
-            }
-            return false;
-        }
-
-        public bool FindUndoPoint() {
-
-            if(RingBuffer.head > 0) {
-                RingBuffer.buffer[RingBuffer.head] = default; // Wipe current head pointer.
-                RingBuffer.head--;
-
-                //// HACK
-                //if(RingBuffer.buffer[RingBuffer.head].spawnedFromMove) {
-                //    return FindUndoPoint();
-                //}
-
-                return true;
-            }
-            //else if(RingBuffer.head == 0 && RingBuffer.buffer[RingBuffer.head].spawnedFromMove) { // HACK
-            //    RingBuffer.Set(default);
-            //    gameObject.SetActive(false);
-            //    RingBuffer.head = -1;
-            //    return false;
-            //}
-
-            return false;
-
-            //var headCopy = (RingBuffer.head - 1) % RingBuffer.capacity;
-            //var tries = 1; // Increment tries, since we took a step back in the code above.
-
-            //if(!gameObject.activeInHierarchy) { // Just go back once if the tile is inactive.
-            //    RingBuffer.head = headCopy;
-            //    return true;
-
-            //}
-
-            //while(RingBuffer.buffer[headCopy].value == 0 && tries < RingBuffer.capacity) {
-            //    headCopy = (headCopy - 1) % RingBuffer.capacity;
-            //    tries++;
-            //}
-
-            //if(tries >= RingBuffer.capacity) {
-            //    Debug.Log("Couldn't find an Undo point.");
-            //    // Couldn't find an Undo point.
-            //    return false;
-            //}
-            //else {
-            //    // We found an Undo point.
-            //    Debug.Log($"FOUND Undo point. tries: {tries}");
-            //    RingBuffer.buffer[RingBuffer.head] = default; // Wipe current head pointer.
-            //    RingBuffer.head = headCopy; // Set head to the newly found Undo pointer.
-            //}
-
-            //return true;
-        }
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         public static void InitLerp(Tile t, in float tileLerpDuration) {
             if(t == null) return;
@@ -190,7 +134,7 @@ namespace My2048 {
         }
 
         public void ResetFlagsAndIndex() {
-            RingBuffer = new MyRingBuffer<TileData>();
+            //RingBuffer = new MyRingBuffer<TileData>();
             //CurrentMove.merged = false;
             //CurrentMove.removed = false;
             //CurrentMove.spawnedFromMove = false;

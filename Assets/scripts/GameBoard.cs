@@ -179,14 +179,7 @@ namespace My2048 {
                 currentMove.spawnedFromMove = true;
             }
             t.SetSprite();
-
-            //var p = t.RingBuffer.Peek();
-            //if(p.value != 0 || p.removed) {
-            //    Debug.LogWarning($"overwriting tile state at head {t.RingBuffer.head} when spawning.");
-            //}
-
-            t.RingBuffer.Push(currentMove);
-            
+            t.CurrentMove = currentMove;
             return t;
         }
 
