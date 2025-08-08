@@ -55,11 +55,7 @@ MonoBehaviour:
       index:
         x: 0
         y: 0
-    - value: 0
-      merged: 0
-      removed: 0
-      spawnedFromMove: 0
-      index:
+      removedIndex:
         x: 0
         y: 0
     - value: 0
@@ -69,6 +65,9 @@ MonoBehaviour:
       index:
         x: 0
         y: 0
+      removedIndex:
+        x: 0
+        y: 0
     - value: 0
       merged: 0
       removed: 0
@@ -76,7 +75,140 @@ MonoBehaviour:
       index:
         x: 0
         y: 0
-    capacity: 4
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    - value: 0
+      merged: 0
+      removed: 0
+      spawnedFromMove: 0
+      index:
+        x: 0
+        y: 0
+      removedIndex:
+        x: 0
+        y: 0
+    capacity: 16
   value: 0
   lerpData:
     lerpDuration: 0

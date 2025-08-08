@@ -84,7 +84,13 @@ public class TwentyFortyEight : MonoBehaviour {
             if(t.RingBuffer.head == 0) { // Skip the Tiles Spawned on a new game.
                 continue;
             }
+
             // TODO: Quite hacky, because of state issues related to SpawningTiles and Non-Spawned-Tiles having -1 head pointer.
+
+            if(t.RingBuffer.head != -1 && t.CurrentMove.spawnedFromMove) {
+                continue; // Already have state pushed from Spawned Tiles.........
+            }
+
             t.RingBuffer.Push(new TileData {
                 value           = t.value,
                 index           = t.RingBuffer.head == -1 ? new Index((int)t.transform.position.x, (int)t.transform.position.y) : t.CurrentMove.index,
@@ -174,61 +180,20 @@ public class TwentyFortyEight : MonoBehaviour {
 
         foreach(var tile in board.TilePool) {
 
-            if(tile.RingBuffer.head == -1) {
-                // Skip unplayed?
-                continue;
-            }
-
-            if(tile.RingBuffer.head == 0) {
-                // Skip tiles that cannot undo.
-                continue;
-            }
-
-            //if(tile.CurrentMove.merged) {
-            //    tile.value /= 2;
-            //    Tile.DebugSetGameObjectName(tile);
+            //if(tile.CurrentMove.spawnedFromMove) {
+            //    tile.Undo(); // MEH!
             //}
 
-            //if(tile.CurrentMove.removed) {
-            //    tile.gameObject.SetActive(true);
-            //}
-
-            //tile.SetSprite();
-
-            if(tile.FindUndoPoint()) {
-                tile.value = tile.CurrentMove.value;
-
-                if(tile.value == 0) { // Check if the tile should be deactivated / removed.
-                    tile.gameObject.SetActive(false);
-                }
-                else {
-                    tile.gameObject.SetActive(true);
-                }
-
-                tile.SetSprite();
-
-                if(tile.CurrentMove.removed) {
-                    // Use the RemovedIndex here.
-                    // Flip the Lerp Start and End positions.
-                    tile.lerpData.end   = new Vector2 (tile.CurrentMove.removedIndex.x, tile.CurrentMove.removedIndex.y);
-                    tile.lerpData.start = new Vector2 (tile.CurrentMove.index.x, tile.CurrentMove.index.y);
-                    tile.transform.position = tile.lerpData.start; // Instantly move the position to avoid Lerping
-                                                                   // from a possibly newly spawned position.
-
-                    // HACK
-                    // Force undo again...
-                    //tile.RingBuffer.Undo();
-                }
-                else{
-                    // Flip the Lerp Start and End positions.
-                    tile.lerpData.end   = new Vector2 (tile.CurrentMove.index.x, tile.CurrentMove.index.y);
-                    tile.lerpData.start = tile.transform.position;
-                }
+            if(tile.Undo() && tile.Undo()) { 
 
                 if(tile.CurrentMove.spawnedFromMove) {
                     Debug.Assert(board.spawnedTile == null);
                     board.spawnedTile = tile;
                 }
+
+                //if(tile.CurrentMove.merged || tile.CurrentMove.removed) {
+                //    tile.Undo();
+                //}
             }
             
             // Don't write deactivated tiles back to the board.
@@ -275,7 +240,7 @@ public class TwentyFortyEight : MonoBehaviour {
             PlayerPrefs.SetInt("best", (int)bestScore);
             
             // Push states? do we want to do this also when we Undo???
-            //PushTileStates();
+            PushTileStates();
 
             CheckForWinOrLose();
         }
@@ -318,28 +283,40 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
         
+        // Reset removed flags.........When Undoing, we may get stuck at head 0 with a Removed flag and thus cannot
+        // make any moves due to the Remove flag.
+        //foreach(var tile in board.TilePool) {
+        //    tile.RingBuffer.Set(new TileData {
+        //        index           = tile.CurrentMove.index,
+        //        removed         = false,
+        //        merged          = tile.CurrentMove.merged,
+        //        spawnedFromMove = tile.CurrentMove.spawnedFromMove,
+        //        value           = tile.CurrentMove.value,
+        //    });
+        //}
+
         if(!CanMove(move.swipe)) {
             return false;
+        }
+
+        for(int i = 0; i < board.tiles.Count; i++) {
+            var t = board.tiles[i];
+            if(t) {
+                t.RingBuffer.Push(t.CurrentMove);
+            }
         }
 
         // Reset the merged, removed, spawned flags to allow Tiles to be merged properly. We really don't care about
         // these flags outside of this function, it's essentially only needed to prevent a Tile from merging multiple times
         // per Move. (We may want such behaviour in the future?)
-        foreach(var tile in board.TilePool) {
-            tile.RingBuffer.Push(new TileData {
-                index           = tile.CurrentMove.index,
-                removed         = false,
-                merged          = false,
-                spawnedFromMove = tile.CurrentMove.spawnedFromMove,
-                value           = tile.CurrentMove.value,
-            });
-        }
-
-        //// NOTE: Seems we have to Push the tile states of Unplayed tiles because of they may be Removed?
         //foreach(var tile in board.TilePool) {
-        //    if(!tile.gameObject.activeInHierarchy) {
-        //        tile.RingBuffer.Push(default);
-        //    }
+        //    tile.RingBuffer.Push(new TileData {
+        //        index           = tile.CurrentMove.index,
+        //        removed         = false,
+        //        merged          = false,
+        //        spawnedFromMove = tile.CurrentMove.spawnedFromMove,
+        //        value           = tile.CurrentMove.value,
+        //    });
         //}
 
         gameState.previousSwipe  = move.swipe;
@@ -418,6 +395,9 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile.DebugSetGameObjectName(tile);
             }
         }
+
+        
+        
         return true;
     }
 
@@ -448,9 +428,9 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        if(tile.CurrentMove.removed) {
-            return false;
-        }
+        //if(tile.CurrentMove.removed) {
+        //    return false;
+        //}
 
         Tile query = board.GetNextTile(tile, swipeData);
         if(query && tile.value == query.value) {

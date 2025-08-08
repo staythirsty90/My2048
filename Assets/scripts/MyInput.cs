@@ -72,7 +72,7 @@ namespace My2048 {
             }
 
             if(Input.GetKeyUp(KeyCode.Z) && game.board.spawnedTile) {
-                game.board.spawnedTile.AnimateShrink();
+                game.UndoPressed();
             }
 
             return default;

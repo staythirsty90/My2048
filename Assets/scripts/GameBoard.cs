@@ -214,8 +214,9 @@ namespace My2048 {
         }
 
         public Tile GetNextTile(Tile t, SwipeData swipeData) {
-            int x = t.CurrentMove.index.x;
-            int y = t.CurrentMove.index.y;
+            // TODO: Don't like having to check for removed!
+            int x = t.CurrentMove.removed ? t.CurrentMove.removedIndex.x : t.CurrentMove.index.x;
+            int y = t.CurrentMove.removed ? t.CurrentMove.removedIndex.y : t.CurrentMove.index.y;
             Tile next = null;
             int count = 0;
             int xDir = 0;
@@ -241,8 +242,9 @@ namespace My2048 {
         }
 
         public Index GetNextEmptyIndex(Tile t, SwipeData swipeData) {
-            var x = t.CurrentMove.index.x;
-            var y = t.CurrentMove.index.y;
+            // TODO: Don't like having to check for removed!
+            int x = t.CurrentMove.removed ? t.CurrentMove.removedIndex.x : t.CurrentMove.index.x;
+            int y = t.CurrentMove.removed ? t.CurrentMove.removedIndex.y : t.CurrentMove.index.y;
             var next = Index.Invalid;
             var count = 0;
             var xDir = 0;

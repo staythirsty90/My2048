@@ -8,7 +8,7 @@ namespace My2048 {
             set { RingBuffer.Set(value); }
         }
 
-        public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>(4);
+        public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>();
 
         public uint value;
         public LerpData<Vector2> lerpData;
@@ -55,6 +55,69 @@ namespace My2048 {
                     t.gameObject.SetActive(false);
                 }
             }
+            else {
+                if(t.CurrentMove.merged) {
+                    t.value /= 2;
+                    t.CurrentMove = new TileData {
+                        value = t.value,
+                        index = t.CurrentMove.index,
+                    };
+                    t.SetSprite();
+                }
+                else if(t.CurrentMove.removed) {
+                    t.CurrentMove = new TileData {
+                        value = t.value,
+                        removed = false,
+                        index = t.CurrentMove.removedIndex,
+                    };
+                }
+                
+            }
+        }
+
+        public bool Undo() {
+            if(RingBuffer.head == -1) {
+                // Skip unplayed?
+                return false;
+            }
+
+            if(RingBuffer.head == 0) {
+                // Skip tiles that cannot undo.
+                return false;
+            }
+
+            if(FindUndoPoint()) {
+                value = CurrentMove.value;
+
+                if(value == 0) { // Check if the tile should be deactivated / removed.
+                    gameObject.SetActive(false);
+                }
+                else {
+                    gameObject.SetActive(true);
+                }
+
+                SetSprite();
+
+                if(CurrentMove.removed) {
+                    // Use the RemovedIndex here.
+                    // Flip the Lerp Start and End positions.
+                    lerpData.end   = new Vector2 (CurrentMove.removedIndex.x, CurrentMove.removedIndex.y);
+                    lerpData.start = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
+                    transform.position = lerpData.start; // Instantly move the position to avoid Lerping
+                                                                   // from a possibly newly spawned position.
+                    // HACK
+                    // Force undo again...
+                    //RingBuffer.Undo();
+                }
+                else{
+                    // Flip the Lerp Start and End positions.
+                    lerpData.end   = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
+                    lerpData.start = transform.position;
+                }
+
+                return true;
+            }
+            return false;
         }
 
         public bool FindUndoPoint() {
@@ -128,7 +191,7 @@ namespace My2048 {
         }
 
         public void ResetFlagsAndIndex() {
-            RingBuffer = new MyRingBuffer<TileData>(4);
+            RingBuffer = new MyRingBuffer<TileData>();
             //CurrentMove.merged = false;
             //CurrentMove.removed = false;
             //CurrentMove.spawnedFromMove = false;
@@ -154,17 +217,6 @@ namespace My2048 {
             //ResetFlagsAndIndex();
             gameObject.SetActive(true);
             AnimateSpawn();
-        }
-
-        public void Undo() {
-            if(CurrentMove.merged) {
-                // Unmerge
-                value /= 2;
-                DebugSetGameObjectName(this);
-            }
-            if(CurrentMove.removed) {
-                gameObject.SetActive(true);
-            }
         }
 
         void OnShrinkFinished() { // NOTE: Called from the shrink Animation event.
