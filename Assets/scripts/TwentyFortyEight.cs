@@ -180,20 +180,12 @@ public class TwentyFortyEight : MonoBehaviour {
 
         foreach(var tile in board.TilePool) {
 
-            //if(tile.CurrentMove.spawnedFromMove) {
-            //    tile.Undo(); // MEH!
-            //}
-
-            if(tile.Undo() && tile.Undo()) { 
+            if(tile.Undo() && tile.Undo()) { // Ghetto
 
                 if(tile.CurrentMove.spawnedFromMove) {
                     Debug.Assert(board.spawnedTile == null);
                     board.spawnedTile = tile;
                 }
-
-                //if(tile.CurrentMove.merged || tile.CurrentMove.removed) {
-                //    tile.Undo();
-                //}
             }
             
             // Don't write deactivated tiles back to the board.
@@ -282,42 +274,18 @@ public class TwentyFortyEight : MonoBehaviour {
         if(IsMoving) {
             return false;
         }
-        
-        // Reset removed flags.........When Undoing, we may get stuck at head 0 with a Removed flag and thus cannot
-        // make any moves due to the Remove flag.
-        //foreach(var tile in board.TilePool) {
-        //    tile.RingBuffer.Set(new TileData {
-        //        index           = tile.CurrentMove.index,
-        //        removed         = false,
-        //        merged          = tile.CurrentMove.merged,
-        //        spawnedFromMove = tile.CurrentMove.spawnedFromMove,
-        //        value           = tile.CurrentMove.value,
-        //    });
-        //}
 
         if(!CanMove(move.swipe)) {
             return false;
         }
 
+        // Push the state before moving the Tiles. Why exactly is this required?
         for(int i = 0; i < board.tiles.Count; i++) {
             var t = board.tiles[i];
             if(t) {
                 t.RingBuffer.Push(t.CurrentMove);
             }
         }
-
-        // Reset the merged, removed, spawned flags to allow Tiles to be merged properly. We really don't care about
-        // these flags outside of this function, it's essentially only needed to prevent a Tile from merging multiple times
-        // per Move. (We may want such behaviour in the future?)
-        //foreach(var tile in board.TilePool) {
-        //    tile.RingBuffer.Push(new TileData {
-        //        index           = tile.CurrentMove.index,
-        //        removed         = false,
-        //        merged          = false,
-        //        spawnedFromMove = tile.CurrentMove.spawnedFromMove,
-        //        value           = tile.CurrentMove.value,
-        //    });
-        //}
 
         gameState.previousSwipe  = move.swipe;
         gameState.previousScore  = gameState.score;
@@ -395,9 +363,6 @@ public class TwentyFortyEight : MonoBehaviour {
                 Tile.DebugSetGameObjectName(tile);
             }
         }
-
-        
-        
         return true;
     }
 
@@ -428,7 +393,7 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        //if(tile.CurrentMove.removed) {
+        //if(tile.CurrentMove.removed) { // Removed flag is okay now?
         //    return false;
         //}
 

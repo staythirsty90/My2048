@@ -71,7 +71,6 @@ namespace My2048 {
                         index = t.CurrentMove.removedIndex,
                     };
                 }
-                
             }
         }
 
