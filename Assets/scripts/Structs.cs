@@ -10,6 +10,7 @@ namespace My2048 {
         public int head;
 
         public List<T> buffer;
+        public List<int> bufferLengths;
         public int capacity;
 
         public MyRingBuffer(int Capacity = 4) {
@@ -17,9 +18,26 @@ namespace My2048 {
                 throw new ArgumentException("Capacity must be greater than 0.", nameof(Capacity));
             }
 
-            capacity = Capacity;
-            buffer   = new List<T>(capacity);
-            head     = 0;
+            capacity        = Capacity;
+            buffer          = new List<T>();
+            bufferLengths   = new List<int>(capacity);
+            head            = 0;
+        }
+
+        public void Push(List<T> items) {
+
+
+            if(head >= capacity) {
+                // deal with this
+            }
+
+            bufferLengths.Add(items.Count);
+
+            var count = items.Count;
+            for(int i = head, j = 0; i < count + head; i++, j++) {
+                buffer.Add(items[j]);
+            }
+            head += count;
         }
 
         public void Push(T item) {

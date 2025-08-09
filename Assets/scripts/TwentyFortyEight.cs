@@ -1,6 +1,7 @@
 ﻿using My2048;
 using System;
 using System.Collections.Generic;
+using System.Security.Permissions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,10 +26,7 @@ public class TwentyFortyEight : MonoBehaviour {
     Stack<Tile> tileStack;
     GamePhase phase;
 
-    public TileData[][] test = new TileData[16][];
-
     public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>();
-
 
     void Start() {
         MoveData.Init(board.size);
@@ -86,19 +84,22 @@ public class TwentyFortyEight : MonoBehaviour {
         PushTileStates();
     }
 
+    List<TileData> tileDatasTempBuffer = new List<TileData>(16);
+
     void PushTileStates() {
         // Push the state before moving the Tiles. Why exactly is this required?
 
-        // Temp clear the buffer for debugging purposes.
-        //RingBuffer.buffer.Clear();
+        // NOTE: We cannot push the board.tiles because they are of different Types (Tile & TileData) ...
+        tileDatasTempBuffer.Clear();
 
-        for(int i = 0; i < board.tiles.Count; i++) {
+        var count = board.tiles.Count;
+        for(int i = 0; i < count; i++) {
             var t = board.tiles[i];
             if(t) {
-                RingBuffer.Push(t.CurrentMove);
+                tileDatasTempBuffer.Add(t.CurrentMove);
             }
         }
-        //RingBuffer.head = 0;
+        RingBuffer.Push(tileDatasTempBuffer);
     }
 
     void ResetTileFlags() {
@@ -155,8 +156,9 @@ public class TwentyFortyEight : MonoBehaviour {
     
     public void OnSpawnedTileShrunk() {
         board[board.spawnedTile.CurrentMove.index] = null;
-        // A spawnedTile might have an additonal state??????
-        //board.spawnedTile.RingBuffer.Reset();
+        
+        board.spawnedTile.gameObject.SetActive(false);
+        
         board.spawnedTile = null;
         Undo();
     }
@@ -175,22 +177,75 @@ public class TwentyFortyEight : MonoBehaviour {
         //gameState.canUndo   = false;
 
         // null all tiles currently in play.
-        for(int i = 0; i < board.tiles.Count; i++) {
-            var tile = board.tiles[i];
-            if(tile) {
-                board[tile.CurrentMove.index] = null;
+        //for(int i = 0; i < board.tiles.Count; i++) {
+        //    board.tiles[i] = null;
+        //}
+
+        // When undoing we must:
+        //  1) Remove spawned Tiles (wait for them to Animate away).
+        //  2) Reverse Tiles indexEnd and index (start).
+        //  3) Undo any merges.
+        //  4) Lerp to their index (start) positions.
+        //  5*) Remove tiles?
+
+        // We must start this process of Despawning any spawned Tiles after the Undo button is clicked.
+        // TODO: Assuming we can skip any spawned Tiles because they should already be despawned by now?
+        var bufferLengthIdx = RingBuffer.bufferLengths.Count-1;
+        var bufferLength = RingBuffer.bufferLengths[bufferLengthIdx];
+        for(int i = bufferLength - 1; i < RingBuffer.head; i++) {
+            
+            Debug.Log(i);
+            var td = RingBuffer.buffer[i];
+            if(td.spawnedFromMove) {
+                continue;
             }
+
+            if(td.merged) {
+                td.value /= 2;
+            }
+
+            var temp = td.index;
+            td.index    = td.indexEnd;
+            td.indexEnd = temp;
+
+            RingBuffer.buffer[i] = td;
+
+            var tile = board[td.index];
+
+            tile.CurrentMove.index      = td.index;
+            tile.CurrentMove.indexEnd   = td.indexEnd;
+
+            tile.lerpData.end = new Vector2(td.indexEnd.x, td.indexEnd.y);
+
+            board[td.index]     = null;
+            board[td.indexEnd]  = tile;
+
         }
+
+        RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
+        RingBuffer.buffer.RemoveRange(bufferLength - 1, bufferLength);
+        
+
+        BeginLerpPhase();
+
+
+
+
+        // WE need to fix the index and indexEnd after the lerp finishes after Undo....... perhaps this is a good time
+        // to just wipe the tiles on the field, and recreate them from the Pushed TileData states????
+
+        // I dont think relying on an existing Tile in the board is stable, what happens if a Tile is removed????
+
+
+
+
+        return;
 
         foreach(var tile in board.TilePool) {
 
-            //if(tile.Undo() && tile.Undo()) { // Ghetto
 
-            //    if(tile.CurrentMove.spawnedFromMove) {
-            //        Debug.Assert(board.spawnedTile == null);
-            //        board.spawnedTile = tile;
-            //    }
-            //}
+
+
             
             // Don't write deactivated tiles back to the board.
             if(!tile.gameObject.activeInHierarchy) {
@@ -239,7 +294,6 @@ public class TwentyFortyEight : MonoBehaviour {
             
             // Push states? do we want to do this also when we Undo???
             PushTileStates();
-            //RingBuffer.head++;
 
             CheckForWinOrLose();
         }
@@ -340,8 +394,6 @@ public class TwentyFortyEight : MonoBehaviour {
                         value           = tile.value,
                     };
 
-                    RingBuffer.head++;
-
                     Tile.DebugSetGameObjectName(tile);
 
                     deltaScore          += prevTile.value;
@@ -360,8 +412,6 @@ public class TwentyFortyEight : MonoBehaviour {
                     value           = tile.value,
                 };
 
-                RingBuffer.head++;
-                
                 board[tile.CurrentMove.indexEnd]   = tile;
                 tile.lerpData.end               = board.GetWorldPos(x, y);
                 prevTile                        = tile;
