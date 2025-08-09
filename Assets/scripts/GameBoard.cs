@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace My2048 {
@@ -160,18 +161,21 @@ namespace My2048 {
             return t.CurrentMove.index.x + t.CurrentMove.index.y * size;
         }
 
-        public Tile SpawnTile(int index, uint value, bool spawnedFromMove) {
+        public Tile SpawnTile(int i, uint value, bool spawnedFromMove) {
             Tile t = GetTileFromPool();
             if(!t) {
                 Debug.LogWarning("There are no more tiles in the pool! Instantiating one.");
                 t = Object.Instantiate(tilePrefab);
             }
 
-            tiles[index] = t;
-            t.value = value;
+            tiles[i]    = t;
+            t.value     = value;
+            var index   = new Index(i % size, i / size);
+
             var currentMove = new TileData {
-                index = new Index(index % size, index / size),
-                value = value,
+                index       = index,
+                indexEnd    = index,
+                value       = value,
             };
             t.transform.position = GetWorldPos(currentMove.index);
             if(spawnedFromMove) {
@@ -208,8 +212,8 @@ namespace My2048 {
 
         public Tile GetNextTile(Tile t, SwipeData swipeData) {
             // TODO: Don't like having to check for removed!
-            int x = t.CurrentMove.removed ? t.CurrentMove.removedIndex.x : t.CurrentMove.index.x;
-            int y = t.CurrentMove.removed ? t.CurrentMove.removedIndex.y : t.CurrentMove.index.y;
+            int x = t.CurrentMove.indexEnd.x;
+            int y = t.CurrentMove.indexEnd.y;
             Tile next = null;
             int count = 0;
             int xDir = 0;
@@ -236,8 +240,8 @@ namespace My2048 {
 
         public Index GetNextEmptyIndex(Tile t, SwipeData swipeData) {
             // TODO: Don't like having to check for removed!
-            int x = t.CurrentMove.removed ? t.CurrentMove.removedIndex.x : t.CurrentMove.index.x;
-            int y = t.CurrentMove.removed ? t.CurrentMove.removedIndex.y : t.CurrentMove.index.y;
+            int x = t.CurrentMove.indexEnd.x;
+            int y = t.CurrentMove.indexEnd.y;
             var next = Index.Invalid;
             var count = 0;
             var xDir = 0;

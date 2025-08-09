@@ -7,7 +7,7 @@ namespace My2048 {
     [Serializable]
     public class MyRingBuffer<T> {
 
-        public int head = -1;
+        public int head;
 
         public List<T> buffer;
         public int capacity;
@@ -19,7 +19,7 @@ namespace My2048 {
 
             capacity = Capacity;
             buffer   = new List<T>(capacity);
-            head     = -1;
+            head     = 0;
         }
 
         public void Push(T item) {
@@ -211,12 +211,12 @@ namespace My2048 {
         public bool removed;
         public bool spawnedFromMove;
         public Index index;
-        public Index removedIndex; // Need this to better keep track of Undoing. Don't like having to have two indices......
+        public Index indexEnd; // Need this to better keep track of Undoing. Don't like having to have two indices......
 
         public TileData(uint Value, Index Index, Index RemovedIndex, bool Merged, bool Spawned, bool Removed) {
             value           = Value;
             index           = Index;
-            removedIndex    = RemovedIndex;
+            indexEnd    = RemovedIndex;
             merged          = Merged;
             spawnedFromMove = Spawned;
             removed         = Removed;
@@ -231,7 +231,7 @@ namespace My2048 {
 
         public static TileData MakeTileData(in Tile t) {
             if(t) {
-                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.removedIndex, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
+                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.indexEnd, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
             }
             return Empty;
         }

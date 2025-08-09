@@ -63,7 +63,7 @@ namespace My2048 {
                     t.CurrentMove = new TileData {
                         value = t.value,
                         removed = false,
-                        index = t.CurrentMove.removedIndex,
+                        //index = t.CurrentMove.indexEnd,
                     };
                 }
             }

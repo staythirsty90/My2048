@@ -90,7 +90,7 @@ public class TwentyFortyEight : MonoBehaviour {
         // Push the state before moving the Tiles. Why exactly is this required?
 
         // Temp clear the buffer for debugging purposes.
-        RingBuffer.buffer.Clear();
+        //RingBuffer.buffer.Clear();
 
         for(int i = 0; i < board.tiles.Count; i++) {
             var t = board.tiles[i];
@@ -98,7 +98,7 @@ public class TwentyFortyEight : MonoBehaviour {
                 RingBuffer.Push(t.CurrentMove);
             }
         }
-        RingBuffer.head = 0;
+        //RingBuffer.head = 0;
     }
 
     void ResetTileFlags() {
@@ -200,7 +200,7 @@ public class TwentyFortyEight : MonoBehaviour {
             // Not happy having to check for removed again.
             var targetIndex = tile.CurrentMove.index;
             if(tile.CurrentMove.removed) {
-                targetIndex = tile.CurrentMove.removedIndex;
+                targetIndex = tile.CurrentMove.indexEnd;
             }
 
             Debug.Log($"Writing tile ({targetIndex}) to board");
@@ -222,7 +222,9 @@ public class TwentyFortyEight : MonoBehaviour {
             scoreText.text      = gameState.score.ToString();
         }
         else {
+
             board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
+
             gameState.score     += deltaScore;
             deltaScore          = 0;
 
@@ -237,6 +239,7 @@ public class TwentyFortyEight : MonoBehaviour {
             
             // Push states? do we want to do this also when we Undo???
             PushTileStates();
+            //RingBuffer.head++;
 
             CheckForWinOrLose();
         }
@@ -283,8 +286,8 @@ public class TwentyFortyEight : MonoBehaviour {
             return false;
         }
 
-        PushTileStates();
         ResetTileFlags();
+        //PushTileStates();
 
         gameState.previousSwipe  = move.swipe;
         gameState.previousScore  = gameState.score;
@@ -321,6 +324,7 @@ public class TwentyFortyEight : MonoBehaviour {
 
                     prevTile.CurrentMove = new TileData {
                         index           = prevTile.CurrentMove.index,
+                        indexEnd        = prevTile.CurrentMove.indexEnd,
                         merged          = true,
                         removed         = false,
                         spawnedFromMove = false,
@@ -328,13 +332,15 @@ public class TwentyFortyEight : MonoBehaviour {
                     };
 
                     tile.CurrentMove = new TileData {
-                        removedIndex    = tile.CurrentMove.index,
-                        index           = prevTile.CurrentMove.index,
+                        index           = tile.CurrentMove.index,
+                        indexEnd        = prevTile.CurrentMove.indexEnd,
                         merged          = false,
                         removed         = true,
                         spawnedFromMove = false,
                         value           = tile.value,
                     };
+
+                    RingBuffer.head++;
 
                     Tile.DebugSetGameObjectName(tile);
 
@@ -346,14 +352,17 @@ public class TwentyFortyEight : MonoBehaviour {
                 }
 
                 tile.CurrentMove = new TileData {
-                    index           = new Index(x, y),
+                    index           = tile.CurrentMove.index,
+                    indexEnd        = new Index(x, y),
                     merged          = false,
                     removed         = false,
                     spawnedFromMove = false,
                     value           = tile.value,
                 };
 
-                board[tile.CurrentMove.index]   = tile;
+                RingBuffer.head++;
+                
+                board[tile.CurrentMove.indexEnd]   = tile;
                 tile.lerpData.end               = board.GetWorldPos(x, y);
                 prevTile                        = tile;
                 x                               -= move.xDir;
