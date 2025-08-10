@@ -95,11 +95,13 @@ public class TwentyFortyEight : MonoBehaviour {
         var count = board.tiles.Count;
         for(int i = 0; i < count; i++) {
             var t = board.tiles[i];
-            if(t) {
+            if(t /*&& !RingBuffer.buffer.Contains(t.CurrentMove)*/) {
                 tileDatasTempBuffer.Add(t.CurrentMove);
             }
         }
-        RingBuffer.Push(tileDatasTempBuffer);
+        if(tileDatasTempBuffer.Count > 0) {
+            RingBuffer.Push(tileDatasTempBuffer);
+        }
     }
 
     void ResetTileFlags() {
@@ -168,18 +170,22 @@ public class TwentyFortyEight : MonoBehaviour {
             return;
         }
 
-        if(RingBuffer.head <= 0) {
+        if(RingBuffer.head <= 2) { // TODO: Magic number of 2...
             // Can't undo.
+            Debug.Log("cannot undo!");
             return;
         }
 
         IsUndoing           = true;
         //gameState.canUndo   = false;
 
-        // null all tiles currently in play.
-        //for(int i = 0; i < board.tiles.Count; i++) {
-        //    board.tiles[i] = null;
-        //}
+        // Deactivate and null all Tiles currently in play.
+        for(int i = 0; i < board.tiles.Count; i++) {
+            if(board.tiles[i]) {
+                board.tiles[i].gameObject.SetActive(false);
+                board.tiles[i] = null;
+            }
+        }
 
         // When undoing we must:
         //  1) Remove spawned Tiles (wait for them to Animate away).
@@ -190,54 +196,41 @@ public class TwentyFortyEight : MonoBehaviour {
 
         // We must start this process of Despawning any spawned Tiles after the Undo button is clicked.
         // TODO: Assuming we can skip any spawned Tiles because they should already be despawned by now?
-        var bufferLengthIdx = RingBuffer.bufferLengths.Count-1;
-        var bufferLength = RingBuffer.bufferLengths[bufferLengthIdx];
-        for(int i = bufferLength - 1; i < RingBuffer.head; i++) {
+        var bufferLengthIdx = RingBuffer.bufferLengths.Count-2;
+        var bufferLength    = RingBuffer.bufferLengths[bufferLengthIdx];
+        
+        for(int i = RingBuffer.head - bufferLength; i < RingBuffer.head; i++) {
             
-            Debug.Log(i);
             var td = RingBuffer.buffer[i];
             if(td.spawnedFromMove) {
                 continue;
             }
 
+            var tile = board.GetTileFromPool(); // TODO: assert we found a Tile GameObject. 
+
+            // We must Unmerge the tiles before wiping the state.
+            // We are probably doing this elsewhere......
             if(td.merged) {
                 td.value /= 2;
             }
 
-            var temp = td.index;
+            var temp    = td.index;
             td.index    = td.indexEnd;
             td.indexEnd = temp;
+            
+            tile.CurrentMove = td;
 
-            RingBuffer.buffer[i] = td;
-
-            var tile = board[td.index];
-
-            tile.CurrentMove.index      = td.index;
-            tile.CurrentMove.indexEnd   = td.indexEnd;
-
+            tile.transform.position = new Vector3(td.index.x, td.index.y, tile.transform.position.z);
             tile.lerpData.end = new Vector2(td.indexEnd.x, td.indexEnd.y);
 
-            board[td.index]     = null;
-            board[td.indexEnd]  = tile;
-
+            tile.SetSprite();
         }
 
         RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
-        RingBuffer.buffer.RemoveRange(bufferLength - 1, bufferLength);
-        
+        RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
+        RingBuffer.head = RingBuffer.buffer.Count;
 
         BeginLerpPhase();
-
-
-
-
-        // WE need to fix the index and indexEnd after the lerp finishes after Undo....... perhaps this is a good time
-        // to just wipe the tiles on the field, and recreate them from the Pushed TileData states????
-
-        // I dont think relying on an existing Tile in the board is stable, what happens if a Tile is removed????
-
-
-
 
         return;
 
@@ -272,12 +265,24 @@ public class TwentyFortyEight : MonoBehaviour {
         }
 
         if(IsUndoing) {
+
+            // TODO:
+            // After Undo we must Write the Tiles back to the board.
+            foreach(var t in board.TilePool) {
+                if(!t.gameObject.activeInHierarchy) { // TODO: Better method?
+                    continue;
+                }
+
+                t.CurrentMove.index = t.CurrentMove.indexEnd = new Index((int)t.lerpData.end.x, (int)t.lerpData.end.y);
+
+                board[t.CurrentMove.index] = t;
+            }
+
             IsUndoing           = false;
             gameState.score     = gameState.previousScore;
             scoreText.text      = gameState.score.ToString();
         }
         else {
-
             board.spawnedTile   = board.SpawnRandomTile(spawnedFromMove: true);
 
             gameState.score     += deltaScore;
@@ -394,6 +399,11 @@ public class TwentyFortyEight : MonoBehaviour {
                         value           = tile.value,
                     };
 
+                    // NOTE: We have push the Removed tile, because PushTileState uses tiles that are on the board, only.
+                    // Removed tiles won't be on the board, and will be missed....
+                    RingBuffer.Push(tile.CurrentMove);
+
+
                     Tile.DebugSetGameObjectName(tile);
 
                     deltaScore          += prevTile.value;
@@ -412,11 +422,11 @@ public class TwentyFortyEight : MonoBehaviour {
                     value           = tile.value,
                 };
 
-                board[tile.CurrentMove.indexEnd]   = tile;
-                tile.lerpData.end               = board.GetWorldPos(x, y);
-                prevTile                        = tile;
-                x                               -= move.xDir;
-                y                               -= move.yDir;
+                board[tile.CurrentMove.indexEnd]    = tile;
+                tile.lerpData.end                   = board.GetWorldPos(x, y);
+                prevTile                            = tile;
+                x                                   -= move.xDir;
+                y                                   -= move.yDir;
 
                 Tile.DebugSetGameObjectName(tile);
             }
@@ -492,6 +502,7 @@ public class TwentyFortyEight : MonoBehaviour {
             board.spawnedTile.AnimateShrink();
         }
         else {
+            Debug.LogWarning("Spawned tile was null. Trying Undo() directly");
             Undo();
         }
     }

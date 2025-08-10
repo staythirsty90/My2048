@@ -71,7 +71,7 @@ namespace My2048 {
                 game.board.SpawnRandomTile();
             }
 
-            if(Input.GetKeyUp(KeyCode.Z) && game.board.spawnedTile) {
+            if(Input.GetKeyUp(KeyCode.Z)) {
                 game.UndoPressed();
             }
 

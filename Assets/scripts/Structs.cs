@@ -24,37 +24,51 @@ namespace My2048 {
             head            = 0;
         }
 
-        public void Push(List<T> items) {
+        public void Push(T item) {
+            if(head >= capacity) {
+                // deal with this
+            }
+            
+            // Increase the buffer Length of this current "state".
+            bufferLengths[bufferLengths.Count - 1] += 1;
+            buffer.Add(item);
+            head += 1;
+        }
 
+        public void Push(List<T> items) {
 
             if(head >= capacity) {
                 // deal with this
             }
 
-            bufferLengths.Add(items.Count);
+            if(bufferLengths.Count == 0) {
+                bufferLengths.Add(0);
+            }
+            bufferLengths[bufferLengths.Count-1] += items.Count;
 
             var count = items.Count;
             for(int i = head, j = 0; i < count + head; i++, j++) {
                 buffer.Add(items[j]);
             }
             head += count;
+            bufferLengths.Add(0);
         }
 
-        public void Push(T item) {
+        //public void Push(T item) {
 
-            buffer.Add(item);
+        //    buffer.Add(item);
 
-            //head += 1;
+        //    //head += 1;
 
-            //if(head >= capacity) {
-            //    head = capacity - 1;
-            //    for(int i = 0; i < head; i++) {
-            //        buffer[i] = buffer[i + 1];
-            //    }
-            //}
+        //    //if(head >= capacity) {
+        //    //    head = capacity - 1;
+        //    //    for(int i = 0; i < head; i++) {
+        //    //        buffer[i] = buffer[i + 1];
+        //    //    }
+        //    //}
 
-            //buffer[head] = item;
-        }
+        //    //buffer[head] = item;
+        //}
     }
 
     public enum Direction {

@@ -272,10 +272,10 @@ namespace My2048 {
             return next;
         }
 
-        Tile GetTileFromPool() {
+        public Tile GetTileFromPool() {
             for(int i = 0; i < TilePool.Count; i++) {
                 Tile t = TilePool[i];
-                if(t && !t.gameObject.activeInHierarchy) { // TODO: better checking for a tile ready to be used.
+                if(!t.gameObject.activeInHierarchy) { // TODO: better checking for a tile ready to be used.
                     t.OnRemovedFromPool();
                     //TilePool[i] = null;
                     return t;

@@ -52,19 +52,19 @@ namespace My2048 {
             }
             else {
                 if(t.CurrentMove.merged) {
-                    t.value /= 2;
-                    t.CurrentMove = new TileData {
-                        value = t.value,
-                        index = t.CurrentMove.index,
-                    };
-                    t.SetSprite();
+                    //t.value /= 2;
+                    //t.CurrentMove = new TileData {
+                    //    value = t.value,
+                    //    index = t.CurrentMove.index,
+                    //};
+                    //t.SetSprite();
                 }
                 else if(t.CurrentMove.removed) {
-                    t.CurrentMove = new TileData {
-                        value = t.value,
-                        removed = false,
-                        //index = t.CurrentMove.indexEnd,
-                    };
+                    //t.CurrentMove = new TileData {
+                    //    value = t.value,
+                    //    removed = false,
+                    //    //index = t.CurrentMove.indexEnd,
+                    //};
                 }
             }
         }
@@ -159,7 +159,7 @@ namespace My2048 {
         public void OnRemovedFromPool() {
             //ResetFlagsAndIndex();
             gameObject.SetActive(true);
-            AnimateSpawn();
+            //AnimateSpawn();
         }
 
         void OnShrinkFinished() { // NOTE: Called from the shrink Animation event.
