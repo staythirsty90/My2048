@@ -202,9 +202,7 @@ public class TwentyFortyEight : MonoBehaviour {
         for(int i = RingBuffer.head - bufferLength; i < RingBuffer.head; i++) {
             
             var td = RingBuffer.buffer[i];
-            if(td.spawnedFromMove) {
-                continue;
-            }
+
 
             var tile = board.GetTileFromPool(); // TODO: assert we found a Tile GameObject. 
 
@@ -219,16 +217,25 @@ public class TwentyFortyEight : MonoBehaviour {
             td.indexEnd = temp;
             
             tile.CurrentMove = td;
+            tile.value = td.value; // It's silly that we have two different "value" variables...
 
             tile.transform.position = new Vector3(td.index.x, td.index.y, tile.transform.position.z);
             tile.lerpData.end = new Vector2(td.indexEnd.x, td.indexEnd.y);
 
             tile.SetSprite();
+
+            if(td.spawnedFromMove) {
+                tile.gameObject.SetActive(false);
+            }
+
+            // Super ghetto? write undo state back.
+            RingBuffer.buffer[i] = td;
+
         }
 
-        RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
-        RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
-        RingBuffer.head = RingBuffer.buffer.Count;
+        //RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
+        //RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
+        //RingBuffer.head = RingBuffer.buffer.Count;
 
         BeginLerpPhase();
 
@@ -266,17 +273,80 @@ public class TwentyFortyEight : MonoBehaviour {
 
         if(IsUndoing) {
 
-            // TODO:
-            // After Undo we must Write the Tiles back to the board.
-            foreach(var t in board.TilePool) {
-                if(!t.gameObject.activeInHierarchy) { // TODO: Better method?
-                    continue;
+            // Deactivate gameObjects. Use TilePool because board.tiles is already null.
+            foreach(var tile in board.TilePool) {
+                tile.gameObject.SetActive(false);
+            }
+
+            //foreach(var t in board.TilePool) {
+            //    if(!t.gameObject.activeInHierarchy && !t.CurrentMove.spawnedFromMove) { // TODO: Better method?
+            //        continue;
+            //    }
+
+            //    t.CurrentMove.index = t.CurrentMove.indexEnd = new Index((int)t.lerpData.end.x, (int)t.lerpData.end.y);
+
+            //    board[t.CurrentMove.index] = t;
+            //}
+
+            var bufferLengthIdx = RingBuffer.bufferLengths.Count-2;
+            var bufferLength    = RingBuffer.bufferLengths[bufferLengthIdx];
+            Tile hasSpawned  = null;
+
+            for(int i = RingBuffer.head - bufferLength; i < RingBuffer.head; i++) {
+            
+                var td           = RingBuffer.buffer[i];
+                var tile         = board.GetTileFromPool(); // TODO: assert we found a Tile GameObject. 
+
+                //if(td.spawnedFromMove) {
+                //    hasSpawned = tile;
+                //}
+                
+                if(td.removed) {
+                    // Now we can keep the removed tile deactivated. Though... idk if that will work.
+                    tile.gameObject.SetActive(false);
                 }
 
-                t.CurrentMove.index = t.CurrentMove.indexEnd = new Index((int)t.lerpData.end.x, (int)t.lerpData.end.y);
-
-                board[t.CurrentMove.index] = t;
             }
+
+            RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
+            RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
+            RingBuffer.head = RingBuffer.buffer.Count;
+
+            bufferLengthIdx = RingBuffer.bufferLengths.Count-2;
+            bufferLength    = RingBuffer.bufferLengths[bufferLengthIdx];
+
+            // Deactivate gameObjects. Use TilePool because board.tiles is already null.
+            foreach(var tile in board.TilePool) {
+                tile.gameObject.SetActive(false);
+            }
+
+            for(int i = RingBuffer.head - bufferLength; i < RingBuffer.head; i++) {
+            
+                var td           = RingBuffer.buffer[i];
+                var tile         = board.GetTileFromPool(); // TODO: assert we found a Tile GameObject. 
+
+                if(td.spawnedFromMove) {
+                    hasSpawned = tile;
+                }
+
+                if(td.removed) {
+                    // Now we can keep the removed tile deactivated. Though... idk if that will work.
+                    tile.gameObject.SetActive(false);
+                }
+                else {
+                    // Write non-removed Tiles to the board again.
+                    board[td.index] = tile;
+                }
+
+                tile.CurrentMove = td;
+                tile.transform.position = new Vector3(td.index.x, td.index.y);
+            }
+
+            board.spawnedTile = hasSpawned;
+
+            //RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
+            //RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
+            //RingBuffer.head = RingBuffer.buffer.Count;
 
             IsUndoing           = false;
             gameState.score     = gameState.previousScore;
@@ -395,7 +465,7 @@ public class TwentyFortyEight : MonoBehaviour {
                         indexEnd        = prevTile.CurrentMove.indexEnd,
                         merged          = false,
                         removed         = true,
-                        spawnedFromMove = false,
+                        spawnedFromMove = tile.CurrentMove.spawnedFromMove,
                         value           = tile.value,
                     };
 
@@ -499,6 +569,9 @@ public class TwentyFortyEight : MonoBehaviour {
     public void UndoPressed() {
         if(IsUndoing) return;
         if(board.spawnedTile) {
+            if(!board.spawnedTile.gameObject.activeInHierarchy) {
+                Debug.LogWarning("Spawned tile is inactive...");
+            }
             board.spawnedTile.AnimateShrink();
         }
         else {
