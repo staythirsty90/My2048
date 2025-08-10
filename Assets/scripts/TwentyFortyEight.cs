@@ -201,13 +201,10 @@ public class TwentyFortyEight : MonoBehaviour {
         
         for(int i = RingBuffer.head - bufferLength; i < RingBuffer.head; i++) {
             
-            var td = RingBuffer.buffer[i];
-
-
+            var td   = RingBuffer.buffer[i];
             var tile = board.GetTileFromPool(); // TODO: assert we found a Tile GameObject. 
 
             // We must Unmerge the tiles before wiping the state.
-            // We are probably doing this elsewhere......
             if(td.merged) {
                 td.value /= 2;
             }
@@ -217,7 +214,7 @@ public class TwentyFortyEight : MonoBehaviour {
             td.indexEnd = temp;
             
             tile.CurrentMove = td;
-            tile.value = td.value; // It's silly that we have two different "value" variables...
+            tile.value = td.value; // TODO: It's silly that we have two different "value" variables...
 
             tile.transform.position = new Vector3(td.index.x, td.index.y, tile.transform.position.z);
             tile.lerpData.end = new Vector2(td.indexEnd.x, td.indexEnd.y);
@@ -228,41 +225,10 @@ public class TwentyFortyEight : MonoBehaviour {
                 tile.gameObject.SetActive(false);
             }
 
-            // Super ghetto? write undo state back.
+            // Writing the Undo state back so that we don't have to do it at a later point.
             RingBuffer.buffer[i] = td;
-
         }
 
-        //RingBuffer.bufferLengths.RemoveAt(bufferLengthIdx);
-        //RingBuffer.buffer.RemoveRange(RingBuffer.head - bufferLength, bufferLength);
-        //RingBuffer.head = RingBuffer.buffer.Count;
-
-        BeginLerpPhase();
-
-        return;
-
-        foreach(var tile in board.TilePool) {
-
-
-
-
-            
-            // Don't write deactivated tiles back to the board.
-            if(!tile.gameObject.activeInHierarchy) {
-                continue;
-            }
-
-            // Not happy having to check for removed again.
-            var targetIndex = tile.CurrentMove.index;
-            if(tile.CurrentMove.removed) {
-                targetIndex = tile.CurrentMove.indexEnd;
-            }
-
-            Debug.Log($"Writing tile ({targetIndex}) to board");
-            Debug.Assert(board[targetIndex] == null, $"Writing to non-null Tile at ({targetIndex})!");
-            board[targetIndex] = tile;
-        }
-     
         BeginLerpPhase();
     }
 
@@ -354,9 +320,8 @@ public class TwentyFortyEight : MonoBehaviour {
             CheckForWinOrLose();
         }
 
-
         IsMoving                = false;
-        ////undoButton.interactable = gameState.canUndo;
+        //undoButton.interactable = gameState.canUndo;
         phase                   = GamePhase.GETTING_INPUT;
         
         SaveLoad.Save(game: this);
