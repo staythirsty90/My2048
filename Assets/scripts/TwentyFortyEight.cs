@@ -1,7 +1,5 @@
 ﻿using My2048;
-using System;
 using System.Collections.Generic;
-using System.Security.Permissions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -415,31 +413,15 @@ public class TwentyFortyEight : MonoBehaviour {
                     continue;
                 }
 
-
-                // TODO:
-                // Make setting the newIndex more simple?
                 var newIndex = new Index(x, y);
-                //if(tile.CurrentMove.indexEnd.x == newIndex.x && tile.CurrentMove.indexEnd.y == newIndex.y) {
-                //    // tile didnt move?
-                //    tile.CurrentMove = new TileData {
-                //        index           = newIndex,
-                //        indexEnd        = newIndex,
-                //        merged          = false,
-                //        removed         = false,
-                //        spawnedFromMove = false,
-                //        value           = tile.value,
-                //    };
-                //}
-                //else {
-                    tile.CurrentMove = new TileData {
-                        index           = tile.CurrentMove.indexEnd,
-                        indexEnd        = newIndex,
-                        merged          = false,
-                        removed         = false,
-                        spawnedFromMove = false,
-                        value           = tile.value,
-                    };
-                //}
+                tile.CurrentMove = new TileData {
+                    index           = tile.CurrentMove.indexEnd,
+                    indexEnd        = newIndex,
+                    merged          = false,
+                    removed         = false,
+                    spawnedFromMove = false,
+                    value           = tile.value,
+                };
 
                 board[tile.CurrentMove.indexEnd]    = tile;
                 tile.lerpData.end                   = board.GetWorldPos(x, y);
