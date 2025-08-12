@@ -50,69 +50,7 @@ namespace My2048 {
                     t.gameObject.SetActive(false);
                 }
             }
-            else {
-                if(t.CurrentMove.merged) {
-                    //t.value /= 2;
-                    //t.CurrentMove = new TileData {
-                    //    value = t.value,
-                    //    index = t.CurrentMove.index,
-                    //};
-                    //t.SetSprite();
-                }
-                else if(t.CurrentMove.removed) {
-                    //t.CurrentMove = new TileData {
-                    //    value = t.value,
-                    //    removed = false,
-                    //    //index = t.CurrentMove.indexEnd,
-                    //};
-                }
-            }
         }
-
-        //public bool Undo() {
-        //    if(RingBuffer.head == -1) {
-        //        // Skip unplayed?
-        //        return false;
-        //    }
-
-        //    if(RingBuffer.head == 0) {
-        //        // Skip tiles that cannot undo.
-        //        return false;
-        //    }
-
-        //    if(FindUndoPoint()) {
-        //        value = CurrentMove.value;
-
-        //        if(value == 0) { // Check if the tile should be deactivated / removed.
-        //            gameObject.SetActive(false);
-        //        }
-        //        else {
-        //            gameObject.SetActive(true);
-        //        }
-
-        //        SetSprite();
-
-        //        if(CurrentMove.removed) {
-        //            // Use the RemovedIndex here.
-        //            // Flip the Lerp Start and End positions.
-        //            lerpData.end   = new Vector2 (CurrentMove.removedIndex.x, CurrentMove.removedIndex.y);
-        //            lerpData.start = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
-        //            transform.position = lerpData.start; // Instantly move the position to avoid Lerping
-        //                                                           // from a possibly newly spawned position.
-        //            // HACK
-        //            // Force undo again...
-        //            //RingBuffer.Undo();
-        //        }
-        //        else{
-        //            // Flip the Lerp Start and End positions.
-        //            lerpData.end   = new Vector2 (CurrentMove.index.x, CurrentMove.index.y);
-        //            lerpData.start = transform.position;
-        //        }
-
-        //        return true;
-        //    }
-        //    return false;
-        //}
 
         public static void InitLerp(Tile t, in float tileLerpDuration) {
             if(t == null) return;
@@ -130,7 +68,17 @@ namespace My2048 {
 
         public static void DebugSetGameObjectName(in Tile t) {
             if(!t) return;
-            //t.name = "Tile " + "(" + t.index.x + "," + t.index.y + ")" + " Value: " + t.value;
+            if(t.gameObject.activeInHierarchy) {
+                var txt = t.CurrentMove.merged ? "M " : "";
+                txt += t.CurrentMove.removed ? " R" : "";
+                txt += t.CurrentMove.spawnedFromMove ? " S" : "";
+                t.GetComponentInChildren<TextMesh>()
+                    .text = txt;
+                t.name = $"Tile ({t.CurrentMove.index.x},{t.CurrentMove.index.y})({t.CurrentMove.indexEnd.x},{t.CurrentMove.indexEnd.y}) Value: {t.value} {txt}";
+            }
+            else {
+                t.name = "Tile(Clone)";
+            }
         }
 
         public void ResetFlagsAndIndex() {
@@ -159,7 +107,7 @@ namespace My2048 {
         public void OnRemovedFromPool() {
             //ResetFlagsAndIndex();
             gameObject.SetActive(true);
-            //AnimateSpawn();
+            AnimateSpawn();
         }
 
         void OnShrinkFinished() { // NOTE: Called from the shrink Animation event.
