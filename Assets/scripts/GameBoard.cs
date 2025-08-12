@@ -184,20 +184,28 @@ namespace My2048 {
             }
             t.SetSprite();
             t.CurrentMove = currentMove;
+
+            Tile.DebugSetGameObjectName(t);
             return t;
         }
 
+        List<int> _randomIndexCache = new List<int>();
         public Tile SpawnRandomTile(bool spawnedFromMove = false) {
-            int index = Random.Range(0, Length);
-            float t = 0;
-            while(tiles[index]) {
-                index = Random.Range(0, Length);
-                t += Time.deltaTime;
-                if(t > 100) {
-                    Debug.LogWarning("couldn't spawn a random tile because grid is full");
-                    return null;
+            _randomIndexCache.Clear();
+            for(int i = 0; i < tiles.Count; i++) {
+                var tile = tiles[i];
+                if(tile) {
+                    continue;
                 }
+                _randomIndexCache.Add(i);
             }
+
+            if(_randomIndexCache.Count == 0) {
+                Debug.LogWarning("couldn't spawn a random tile because grid is full");
+                return null;
+            }
+
+            int index = _randomIndexCache[Random.Range(0, _randomIndexCache.Count)];
             uint value = (uint)(Random.Range(0, 100) < 90 ? 2 : 4);
             return SpawnTile(index, value, spawnedFromMove);
         }
