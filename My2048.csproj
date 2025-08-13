@@ -11,10 +11,10 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{E4EA88BB-DA17-89DF-54E0-223EDBE0926B}</ProjectGuid>
+    <ProjectGuid>{4FDAC385-49C6-73CA-8348-08C1C0F13A33}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Assembly-CSharp-Editor</AssemblyName>
+    <AssemblyName>My2048</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -55,23 +55,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\editor\SpriteRectTools.cs" />
-     <Compile Include="Assets\editor\TileDataDrawer.cs" />
-     <Compile Include="Assets\editor\TileDataListEditor.cs" />
- <Reference Include="UnityEditor.TestRunner">
- <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEditor.TestRunner.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.TestRunner">
- <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEngine.TestRunner.dll</HintPath>
+     <Compile Include="Assets\scripts\SaveLoad.cs" />
+     <Compile Include="Assets\scripts\Tile.cs" />
+     <Compile Include="Assets\scripts\GameBoard.cs" />
+     <Compile Include="Assets\scripts\MyInput.cs" />
+     <Compile Include="Assets\scripts\TwentyFortyEight.cs" />
+     <Compile Include="Assets\scripts\Structs.cs" />
+     <Compile Include="Assets\scripts\TileDataBuffer.cs" />
+ <Reference Include="UnityEditor.UI">
+ <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.UI">
  <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
- </Reference>
- <Reference Include="Unity.2D.Sprite.Editor">
- <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
- </Reference>
- <Reference Include="UnityEditor.UI">
- <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -96,12 +91,6 @@
  </Reference>
  <Reference Include="UnityEngine.ClothModule">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.ClothModule.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.ClusterInputModule">
- <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.ClusterInputModule.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.ClusterRendererModule">
- <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.ClusterRendererModule.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.CoreModule">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
@@ -247,9 +236,6 @@
  <Reference Include="UnityEngine.VideoModule">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.VideoModule.dll</HintPath>
  </Reference>
- <Reference Include="UnityEngine.VirtualTexturingModule">
- <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.VirtualTexturingModule.dll</HintPath>
- </Reference>
  <Reference Include="UnityEngine.WindModule">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/Managed/UnityEngine/UnityEngine.WindModule.dll</HintPath>
  </Reference>
@@ -264,9 +250,6 @@
  </Reference>
  <Reference Include="UnityEditor.WindowsStandalone.Extensions">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
- </Reference>
- <Reference Include="nunit.framework">
- <HintPath>S:/Data/UnityProjects/2048 - Copy/Library/PackageCache/com.unity.ext.nunit@1.0.6/net35/unity-custom/nunit.framework.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>
@@ -613,12 +596,6 @@
  <Reference Include="System.Xml.XPath.XDocument">
  <HintPath>C:/Program Files/2020.1.2f1/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/Facades/System.Xml.XPath.XDocument.dll</HintPath>
  </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="My2048.csproj">
-      <Project>{D2060CB7-1D51-E31B-7B87-59C0AFD05C31}</Project>
-      <Name>My2048</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
