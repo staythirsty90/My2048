@@ -24,12 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1966543587134878}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.5, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114609534934906924
 MonoBehaviour:
@@ -90,4 +91,7 @@ MonoBehaviour:
   RingBuffer:
     head: 0
     buffer: []
+    bufferLengths: 
     capacity: 4
+  targetFrameRate: 31
+  targetResolution: {x: 1080, y: 1920}
