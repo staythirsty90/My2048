@@ -26,6 +26,14 @@ public class TwentyFortyEight : MonoBehaviour {
 
     public MyRingBuffer<TileData> RingBuffer = new MyRingBuffer<TileData>();
 
+    [SerializeField] int targetFrameRate = 31;
+    [SerializeField] Vector2Int targetResolution = new Vector2Int(720, 720);
+
+    void Awake() {
+        Application.targetFrameRate = targetFrameRate;
+        Screen.SetResolution(targetResolution.x, targetResolution.y, true);
+    }
+
     void Start() {
         MoveData.Init(board.size); // TODO: Assuming board exists, since its public and Serialized.
 
