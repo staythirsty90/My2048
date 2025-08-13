@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -7,6 +6,7 @@ using UnityEngine.SceneManagement;
 namespace My2048 {
     
     public static class MyInput {
+        static Vector2 startTouch = Vector2.zero;
 
         public static Vector2 GetInputDirection(in TwentyFortyEight game) {
             if(game.IsMoving || game.IsUndoing) {
@@ -14,9 +14,10 @@ namespace My2048 {
             }
 
             var swipeDelta = Vector2.zero;
-            var startTouch = Vector2.zero;
 
             #region Swipe Input
+
+#if UNITY_EDITOR
             if(Input.GetMouseButtonDown(0)) {
                 if(IsTouchOverUIButton()) {
                     return default;
@@ -28,6 +29,7 @@ namespace My2048 {
                 return TrySwipe(startTouch, swipeDelta, game);
             }
 
+#elif UNITY_ANDROID
             if(Input.touchCount != 0) {
                 Touch touch = Input.GetTouch(0);
                 if(touch.phase == TouchPhase.Began) {
@@ -44,6 +46,7 @@ namespace My2048 {
                     return TrySwipe(startTouch, swipeDelta, game);
                 }
             }
+#endif
             #endregion
 
 #if UNITY_EDITOR
@@ -75,26 +78,33 @@ namespace My2048 {
                 game.UndoPressed();
             }
 
-            return default;
 #endif
+            return default;
         }
 
         public static Vector2 TrySwipe(Vector2 startTouch, Vector2 swipeDelta, in TwentyFortyEight game) {
             if(startTouch == Vector2.zero) {
+                Debug.LogWarning("Calling TrySwipe with startTouch of zero");
+                return Vector2.zero;
+            }
+            if(swipeDelta == Vector2.zero) {
+                Debug.LogWarning("Calling TrySwipe with swipeDelta of zero");
                 return Vector2.zero;
             }
 
-            if(swipeDelta.magnitude > game.TouchDeadZone && (startTouch.y / Screen.height) < game.TouchMaxHeightPercent) {
+            if(swipeDelta.magnitude > game.TouchDeadZone && (startTouch.y / Screen.height) < game.TouchMaxHeightPercent && (startTouch.y / Screen.height) > 0.1f) {
                 if(IsTouchOverUIButton()) {
                     return Vector2.zero;
                 }
+                
                 var x = swipeDelta.x;
                 var y = swipeDelta.y;
+            
                 if(Mathf.Abs(x) > Mathf.Abs(y)) {
                     // left or right
                     return x < 0 ? Vector2.left : Vector2.right;
                 }
-                else if(y > 0) {
+                else if(y != 0) {
                     // up or down
                     return y > 0 ? Vector2.up : Vector2.down;
                 }
@@ -110,11 +120,6 @@ namespace My2048 {
             };
             EventSystem.current.RaycastAll(p, results);
             return results.Count > 0;
-#if !UNITY_EDITOR && !UNITY_STANDALONE
-        return EventSystem.current.IsPointerOverGameObject(touch.fingerId);
-#else
-            return EventSystem.current.IsPointerOverGameObject();
-#endif
         }
     }
 }
