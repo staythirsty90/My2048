@@ -379,3 +379,8 @@ FodyWeavers.xsd
 
 [Ee]ditor/
 *.psd
+
+.utmp/
+[Uu]serSettings/
+[Pp]rojectSettings/
+*.apk
