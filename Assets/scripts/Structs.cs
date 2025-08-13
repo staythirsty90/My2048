@@ -263,7 +263,7 @@ namespace My2048 {
 
         public static TileData MakeTileData(in Tile t) {
             if(t) {
-                return new TileData(t.value, t.CurrentMove.index, t.CurrentMove.indexEnd, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
+                return new TileData(t.CurrentMove.value, t.CurrentMove.index, t.CurrentMove.indexEnd, t.CurrentMove.merged, t.CurrentMove.spawnedFromMove, t.CurrentMove.removed);
             }
             return Empty;
         }

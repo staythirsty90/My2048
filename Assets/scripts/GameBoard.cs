@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace My2048 {
@@ -150,17 +149,6 @@ namespace My2048 {
             }
         }
 
-        
-
-        /// <summary>
-        /// Return the i index from the Tile's Index.x and Index.y
-        /// </summary>
-        /// <param name="t">The tile.</param>
-        /// <returns></returns>
-        public int Get_i(in Tile t) {
-            return t.CurrentMove.index.x + t.CurrentMove.index.y * size;
-        }
-
         public Tile SpawnTile(int i, uint value, bool spawnedFromMove) {
             Tile t = GetTileFromPool();
             if(!t) {
@@ -169,7 +157,6 @@ namespace My2048 {
             }
 
             tiles[i]    = t;
-            t.value     = value;
             var index   = new Index(i % size, i / size);
 
             var currentMove = new TileData {
@@ -182,9 +169,9 @@ namespace My2048 {
                 t.AnimateSpawn();
                 currentMove.spawnedFromMove = true;
             }
-            t.SetSprite();
             t.CurrentMove = currentMove;
 
+            t.SetSprite();
             Tile.DebugSetGameObjectName(t);
             return t;
         }
@@ -280,12 +267,11 @@ namespace My2048 {
             return next;
         }
 
-        public Tile GetTileFromPool() {
+        public Tile GetTileFromPool(in bool isUndoing = false) {
             for(int i = 0; i < TilePool.Count; i++) {
                 Tile t = TilePool[i];
                 if(!t.gameObject.activeInHierarchy) { // TODO: better checking for a tile ready to be used.
-                    t.OnRemovedFromPool();
-                    //TilePool[i] = null;
+                    t.OnRemovedFromPool(isUndoing);
                     return t;
                 }
             }
