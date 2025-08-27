@@ -1,17 +1,20 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 namespace My2048 {
     [System.Serializable]
     public class GameBoard {
         public Tile tilePrefab;
-        public int seed = 101;
+        public uint seed = 101;
         public List<Tile> tiles;
         public int size;
         public int Length { get; private set; }
         public Tile spawnedTile;
 
         public List<Tile> TilePool { get; private set; }
+
+        Random random;
 
         public Tile this[int x, int y] {
             get => GetTileFromIndex(x, y);
@@ -60,9 +63,7 @@ namespace My2048 {
         }
 
         public void Create() {
-
-            Random.InitState(seed);
-
+            random          = new Random(seed);
             Length          = size * size;
             tiles           = new List<Tile>(Length);
 
@@ -192,8 +193,8 @@ namespace My2048 {
                 return null;
             }
 
-            int index = _randomIndexCache[Random.Range(0, _randomIndexCache.Count)];
-            uint value = (uint)(Random.Range(0, 100) < 90 ? 2 : 4);
+            int index = _randomIndexCache[random.NextInt(0, _randomIndexCache.Count)];
+            uint value = random.NextUInt(0u, 100u) < 90u ? 2u : 4u;
             return SpawnTile(index, value, spawnedFromMove);
         }
 
